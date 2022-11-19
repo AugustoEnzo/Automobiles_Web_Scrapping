@@ -51,7 +51,8 @@ class CloudantCRUD {
                       Price: Option[Int], Model: String, Brand: String, Kilometers: Option[Int], Description: String,
                       TypeOfCar: String, Location: String, TypeOfShift: String, TypeOfFuel: String,
                       YearOfFabrication: Option[Int], Color: String, Plate: Option[Int], MotorPower: Option[Double],
-                      HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optional: String) : Unit = {
+                      HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optional: String,
+                      URL: String) : Unit = {
 
     val documentIBM: Document = new Document
     // Setting id for the document is optional when "postDocument" method is used for CREATE.
@@ -78,6 +79,7 @@ class CloudantCRUD {
     documentIBM.put("Type of Direction", TypeOfDirection)
     documentIBM.put("Number of doors", NumberOfDoors)
     documentIBM.put("Optional", Optional)
+    documentIBM.put("URL", URL)
 
     val documentOptions: PutDocumentOptions = new PutDocumentOptions.Builder()
       .db(database)

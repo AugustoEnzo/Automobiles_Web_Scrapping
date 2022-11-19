@@ -1,5 +1,6 @@
 import COS.COS
 import Cloudant.CloudantCRUD
+import ParseTitle.Parser
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
@@ -12,6 +13,7 @@ import scala.collection.mutable
 object WebScrapping extends App{
 
   val cloudantClient: CloudantCRUD = new CloudantCRUD
+  val parser: Parser = new Parser
 
   val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios")
     .data("query", "Java")
@@ -47,11 +49,9 @@ object WebScrapping extends App{
           "> div.ad__sc-28oze1-1.fUJtNV > div > div.ad__sc-28oze1-3.hlDnNa > div:nth-child(1) > img")
           .attr("src"), // Thumbnail
 
-        innerImage.asScala.map(image => if (image.select("div > img").attr("src") != null)
-          image.select("div > img").attr("src")
-          else ""), // Map of Images
+        innerImage.asScala.map(image => image.select("div > img").attr("src")), // Map of Images
 
-        innerPage.select(".mHjSV").text.replaceAll("\"", ""), // Title
+        parser.parser(innerPage.select(".mHjSV").text), // Title
 
         innerPage.select(".kgyRfr:nth-child(2) .iZCAvV").text, // Model
 
@@ -67,15 +67,15 @@ object WebScrapping extends App{
 
         innerPage.select(".bbEhPV").text, // Location
 
-        innerPage.select(".fcMYXB+ .fcMYXB .cmFKIN").text, // Type of shift
+        innerPage.select(".fcMYXB:nth-child(10) .cmFKIN").text, // Type of shift
 
         innerPage.select(".fcMYXB~ .fcMYXB+ .fcMYXB .iZCAvV").text, // Type of Fuel
 
-        innerPage.select(".fcMYXB .iZCAvV").text.trim.toIntOption, // Year of fabrication
+        innerPage.select(".fcMYXB:nth-child(5) .iZCAvV").text.trim.toIntOption, // Year of fabrication
 
         innerPage.select(".fcMYXB:nth-child(12) .cmFKIN").text, // Color
 
-        innerPage.select(".fcMYXB:nth-child(10) .cmFKIN").text.toIntOption, // End of plate
+        innerPage.select(".fcMYXB:nth-child(14) .cmFKIN").text.toIntOption, // End of plate
 
         innerPage.select(".fcMYXB:nth-child(7) .cmFKIN").text.toDoubleOption, // Motor power
 
@@ -89,19 +89,18 @@ object WebScrapping extends App{
 
         innerPage.select(".dAHSDM").text, // Optionals
 
-        innerPage.text // URL
+        innerPage.attr("href") // URL
       )
     )
 
     for (objectCar <- carsMap) {
       if ( objectCar._1.nonEmpty & objectCar._1 != "https://static.olx.com.br/cd/listing/notFound.png" &
-        objectCar._2.nonEmpty & objectCar._3.nonEmpty & objectCar._4.nonEmpty
-        & objectCar._4.nonEmpty & objectCar._5.nonEmpty) {
+        objectCar._2.nonEmpty & objectCar._3.nonEmpty) {
 
-        cloudantClient.create_document("automobiles", objectCar._4, objectCar._1, objectCar._2, objectCar._3,
+        cloudantClient.create_document("automobiles", objectCar._3, objectCar._1, objectCar._2, objectCar._3,
           objectCar._6, objectCar._4, objectCar._5, objectCar._7, objectCar._8, objectCar._9, objectCar._10,
           objectCar._11, objectCar._12, objectCar._13, objectCar._14, objectCar._15, objectCar._16, objectCar._17,
-          objectCar._18, objectCar._19, objectCar._20)
+          objectCar._18, objectCar._19, objectCar._20, objectCar._21)
       }
     }
 
