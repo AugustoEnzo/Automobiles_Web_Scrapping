@@ -26,8 +26,7 @@ object WebScrapping extends App{
   for (pg: Int <- Range(1, docMaxPage.toInt+1, 1)) {
     val page: String = pg.toString
     val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios?o=$page")
-      .data("query", "Java")
-      .userAgent("Mozilla")
+      .data("name", "jsoup", "query", "Scala", "language", "Portuguese")
       .timeout(10000)
       .get()
 
@@ -42,7 +41,7 @@ object WebScrapping extends App{
 
     val carsMap: mutable.Buffer[(String, mutable.Buffer[String], String, String, String, Option[Int], Option[Int],
       String, String, String, String, String, Option[Int], String, Option[Int], Option[Double], Option[Boolean],
-      String, Option[Int], String, String)] = carIterator.asScala.map(car =>
+      String, Option[Int], String, String)] = carIterator.asScala.map(_ =>
       (
         innerPage.select("#content > div.ad__sc-18p038x-2.djeeke > div > div.sc-bwzfXH.ad__h3us20-0.ikHgMx " +
           "> div.ad__duvuxf-0.ad__h3us20-0.eCUDNu > div.ad__h3us20-6.bgBcvm > div > div > div " +
@@ -89,13 +88,13 @@ object WebScrapping extends App{
 
         innerPage.select(".dAHSDM").text, // Optionals
 
-        innerPage.attr("href") // URL
+        carIterator.select("div > a").attr("href")// URL
       )
     )
 
     for (objectCar <- carsMap) {
-      if ( objectCar._1.nonEmpty & objectCar._1 != "https://static.olx.com.br/cd/listing/notFound.png" &
-        objectCar._2.nonEmpty & objectCar._3.nonEmpty) {
+      if ( objectCar._1.nonEmpty & objectCar._1 != "https://static.olx.com.br/cd/listing/notFound.png"
+        & objectCar._3.nonEmpty) {
 
         cloudantClient.create_document("automobiles", objectCar._3, objectCar._1, objectCar._2, objectCar._3,
           objectCar._6, objectCar._4, objectCar._5, objectCar._7, objectCar._8, objectCar._9, objectCar._10,
