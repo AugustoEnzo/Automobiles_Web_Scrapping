@@ -1,12 +1,12 @@
 package Cloudant
 
 import com.ibm.cloud.cloudant.v1.Cloudant
-import com.ibm.cloud.cloudant.v1.model.{Document, DocumentResult, Ok, PutDatabaseOptions, PutDocumentOptions}
+import com.ibm.cloud.cloudant.v1.model.{AllDocsResult, Document, DocumentResult, Ok, PostAllDocsOptions, PutDatabaseOptions, PutDocumentOptions}
 import com.ibm.cloud.sdk.core.service.exception.{NotFoundException, ServiceResponseException}
 import com.ibm.cloud.sdk.core.security.IamAuthenticator
-import JSIMPLE.parse
+import JSIMPLE.{parse, parseDocResult}
 
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 
 class CloudantCRUD {
   // 1. Create a client with `CLOUDANT` default service name ============
@@ -151,5 +151,20 @@ class CloudantCRUD {
     }
   }
 
+  def documentOnDatabase(database: String, documentID: String): Boolean = {
+    val docsOptions: PostAllDocsOptions =
+      new PostAllDocsOptions.Builder()
+        .db(database)
+        .key(documentID)
+        .build()
+
+    val response: AllDocsResult = client.postAllDocs(docsOptions).execute.getResult
+
+    val parsedResponse: String = parseDocResult(response)
+
+    if (parsedResponse == documentID) {
+      true
+    } else false
+  }
 
 }

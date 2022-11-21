@@ -1,5 +1,6 @@
 import scala.collection.{immutable, mutable}
 import scala.io.Source
+import com.ibm.cloud.cloudant.v1.model.AllDocsResult
 
 package object JSIMPLE {
   var stringMap: mutable.Map[String, String] = mutable.Map[String, String]()
@@ -24,5 +25,18 @@ package object JSIMPLE {
 
     val finalMap: immutable.Map[String, String] = stringMap.toMap
     finalMap
+  }
+
+  def parseDocResult(response: AllDocsResult): String = {
+    var result: String = ""
+    response.getRows.forEach(row =>
+      try {
+        result = row.getKey
+
+      } catch {
+        case _: Throwable => null
+      }
+    )
+    result
   }
 }

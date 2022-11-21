@@ -5,8 +5,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 
-import java.io.FileOutputStream
-import java.net.URL
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
@@ -96,10 +94,14 @@ object WebScrapping extends App{
       if ( objectCar._1.nonEmpty & objectCar._1 != "https://static.olx.com.br/cd/listing/notFound.png"
         & objectCar._3.nonEmpty) {
 
-        cloudantClient.create_document("automobiles", objectCar._3, objectCar._1, objectCar._2, objectCar._3,
-          objectCar._6, objectCar._4, objectCar._5, objectCar._7, objectCar._8, objectCar._9, objectCar._10,
-          objectCar._11, objectCar._12, objectCar._13, objectCar._14, objectCar._15, objectCar._16, objectCar._17,
-          objectCar._18, objectCar._19, objectCar._20, objectCar._21)
+        println(objectCar._3)
+
+//        if (!cloudantClient.documentOnDatabase("automobiles", objectCar._3)) {
+//          cloudantClient.create_document("automobiles", objectCar._3, objectCar._1, objectCar._2, objectCar._3,
+//            objectCar._6, objectCar._4, objectCar._5, objectCar._7, objectCar._8, objectCar._9, objectCar._10,
+//            objectCar._11, objectCar._12, objectCar._13, objectCar._14, objectCar._15, objectCar._16, objectCar._17,
+//            objectCar._18, objectCar._19, objectCar._20, objectCar._21)
+//        }
       }
     }
 
