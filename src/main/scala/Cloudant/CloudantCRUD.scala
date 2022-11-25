@@ -52,7 +52,7 @@ class CloudantCRUD {
                       TypeOfCar: String, Location: String, TypeOfShift: String, TypeOfFuel: String,
                       YearOfFabrication: Option[Int], Color: String, Plate: Option[Int], MotorPower: Option[Double],
                       HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optional: String,
-                      URL: String) : Unit = {
+                      URL: String, ID: String) : Unit = {
 
     val documentIBM: Document = new Document
     // Setting id for the document is optional when "postDocument" method is used for CREATE.
@@ -80,6 +80,7 @@ class CloudantCRUD {
     documentIBM.put("Number of doors", NumberOfDoors)
     documentIBM.put("Optional", Optional)
     documentIBM.put("URL", URL)
+    documentIBM.put("ID", ID)
 
     val documentOptions: PutDocumentOptions = new PutDocumentOptions.Builder()
       .db(database)
@@ -112,7 +113,6 @@ class CloudantCRUD {
           println("Cannot create \"" + id + "\" Collection already exists.")
         }
       }
-
 
     // Save the document in the database with "postDocument" method
     /*
