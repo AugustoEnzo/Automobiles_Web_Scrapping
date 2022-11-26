@@ -47,12 +47,12 @@ class CloudantCRUD {
 
   // 3. Create a document ===============================================
   // Create the car document id
-  def create_document(database: String, id: String, Image: String, MapOfImages: mutable.Buffer[String],Title: String,
+  def create_document(database: String, id: String, Image: String, MapOfImages: mutable.Buffer[String], Title: String,
                       Price: Option[Int], Model: String, Brand: String, Kilometers: Option[Int], Description: String,
                       TypeOfCar: String, Location: String, TypeOfShift: String, TypeOfFuel: String,
-                      YearOfFabrication: Option[Int], Color: String, Plate: Option[Int], MotorPower: Option[Double],
-                      HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optional: String,
-                      URL: String, ID: String) : Unit = {
+                      YearOfFabrication: Option[Int], Color: String, EndOfPlate: Option[Int], MotorPower: Option[Double],
+                      HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optionals: String,
+                      URL: String) : Unit = {
 
     val documentIBM: Document = new Document
     // Setting id for the document is optional when "postDocument" method is used for CREATE.
@@ -73,14 +73,13 @@ class CloudantCRUD {
     documentIBM.put("Type of Fuel", TypeOfFuel)
     documentIBM.put("Year of Fabrication", YearOfFabrication)
     documentIBM.put("Color", Color)
-    documentIBM.put("End of Plate", Plate)
+    documentIBM.put("End of Plate", EndOfPlate)
     documentIBM.put("Motor Power", MotorPower)
     documentIBM.put("Has VNG Kit", HasGNV)
     documentIBM.put("Type of Direction", TypeOfDirection)
     documentIBM.put("Number of doors", NumberOfDoors)
-    documentIBM.put("Optional", Optional)
+    documentIBM.put("Optional", Optionals)
     documentIBM.put("URL", URL)
-    documentIBM.put("ID", ID)
 
     val documentOptions: PutDocumentOptions = new PutDocumentOptions.Builder()
       .db(database)
