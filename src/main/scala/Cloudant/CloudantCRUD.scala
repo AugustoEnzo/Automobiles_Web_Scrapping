@@ -52,7 +52,10 @@ class CloudantCRUD {
                       TypeOfCar: String, Location: String, TypeOfShift: String, TypeOfFuel: String,
                       YearOfFabrication: Option[Int], Color: String, EndOfPlate: Option[Int], MotorPower: Option[Double],
                       HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optionals: String,
-                      URL: String) : Unit = {
+                      URL: String, PublishDate: String, Publisher: String, IsVerified: Option[Boolean],
+                      Profile: String, CEP: String, Characteristics: String, IsHighlighted: Option[Boolean],
+                      AverageOlxPrice: Option[Int], FipePrice: Option[Int], DifferenceToOlxAveragePrice: Option[Int],
+                      DifferenceToFipePrice: Option[Int]) : Unit = {
 
     val documentIBM: Document = new Document
     // Setting id for the document is optional when "postDocument" method is used for CREATE.
@@ -80,6 +83,17 @@ class CloudantCRUD {
     documentIBM.put("Number of doors", NumberOfDoors)
     documentIBM.put("Optional", Optionals)
     documentIBM.put("URL", URL)
+    documentIBM.put("Publish Date", PublishDate)
+    documentIBM.put("Publisher", Publisher)
+    documentIBM.put("Is verified", IsVerified)
+    documentIBM.put("Profile", Profile)
+    documentIBM.put("CEP", CEP)
+    documentIBM.put("Characteristics", Characteristics)
+    documentIBM.put("Is Highlighted", IsHighlighted)
+    documentIBM.put("Average Olx Price", AverageOlxPrice)
+    documentIBM.put("FIPE Price", FipePrice)
+    documentIBM.put("Difference to Olx Average Price", DifferenceToOlxAveragePrice)
+    documentIBM.put("Difference to FIPE Price", DifferenceToFipePrice)
 
     val documentOptions: PutDocumentOptions = new PutDocumentOptions.Builder()
       .db(database)

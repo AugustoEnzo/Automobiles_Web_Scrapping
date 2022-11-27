@@ -1,14 +1,17 @@
-import COS.COS
 import Cloudant.CloudantCRUD
 import ParseTitle.Parser
 import org.jsoup.Jsoup
-import org.jsoup.nodes.{Document, Element}
+import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 
+import java.io.File
+import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
+import java.util
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-object WebScrapping extends App {
+object Jsoup extends App {
 
   val cloudantClient: CloudantCRUD = new CloudantCRUD
   val parser: Parser = new Parser
@@ -24,15 +27,27 @@ object WebScrapping extends App {
   for (pg: Int <- Range(1, docMaxPage.toInt + 1, 1)) {
     val page: String = pg.toString
     val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios?o=$page")
-      .timeout(10000)
-      .get()
+      .maxBodySize(1024 * 1024 * 100)
+      .userAgent("Mozilla")
+      .data("name", "jsoup")
+      .timeout(10 * 1000)
+      .ignoreContentType(true)
+      .get
 
-    for (num: Int <- Range(1, 55+1, 1)) {
+    for (num: Int <- Range(1, 55 + 1, 1)) {
       val carIterator: Elements = doc.select(s"#ad-list > li:nth-child($num)")
 
       if (carIterator.text != "") {
         val innerPage: Document = Jsoup.connect(carIterator.select("div > a")
-          .attr("href")).get
+          .attr("href"))
+          .maxBodySize(0)
+          .userAgent("Mozilla")
+          .data("name", "jsoup")
+          .timeout(50 * 1000)
+          .ignoreContentType(true)
+          .get
+
+        Files.write(Paths.get("pageHTML.html"), util.Arrays.asList(innerPage.html), StandardCharsets.UTF_8)
 
         val innerImage: Elements = innerPage.select("#content > div.ad__sc-18p038x-2.djeeke " +
           "> div > div.sc-bwzfXH.ad__h3us20-0.ikHgMx > div.ad__duvuxf-0.ad__h3us20-0.eCUDNu > div.ad__h3us20-6.bgBcvm " +
@@ -90,17 +105,45 @@ object WebScrapping extends App {
         val publishData: String = innerPage.select(".hSZkck").text
           .replace("Publicado em ", "").replace(" às ", ":") // Publish Date
 
+        val publisher: String = innerPage.select(".eTDtqs").text // Publisher
+
+        val isVerified: Option[Boolean] = if (innerPage.select(".eeZcHp").text == "VERIFICADO")
+          "true".toBooleanOption else "false".toBooleanOption // IsVerified
+
+        val profile: String = innerPage.select("#miniprofile > div > div > div.sc-emjYpo.jhoayJ " +
+          "> div.sc-LAuEU.gFGNJM.sc-jTzLTM.iwtnNi > div > div > div > a").attr("href") // Publisher Profile URL
+
+        val cep: String = innerPage.select(".kUfvdA:nth-child(1) .kaNiaQ").text // CEP of the Publisher
+
+        val characteristics: String = innerPage.select(".jjjMGP").text().replace("\n", "|") // Characteristics of the ad
+
+        val isHighlighted: Option[Boolean] = if (innerPage.select(".iAXfrR").text == "DESTAQUE")
+          "true".toBooleanOption else "false".toBooleanOption
+
+        val averageOlxPrice: Option[Int] = innerPage.select(".hOrZdh:nth-child(1) .iDQboK").text
+          .replace("R$ ", "").replace(".", "").toIntOption
+
+        val fipePrice: Option[Int] = innerPage.select(".hOrZdh+ .hOrZdh .iDQboK").text
+          .replace("R$ ", "").replace(".", "").toIntOption
+
+        val differenceToOlxAveragePrice: Option[Int] = if (price.isDefined & averageOlxPrice.isDefined)
+          Some(price.get - averageOlxPrice.get) else None
+
+        val differenceToFipePrice: Option[Int] = if (price.isDefined & fipePrice.isDefined)
+          Some(price.get - fipePrice.get) else None
+
         if (thumbnail.nonEmpty & thumbnail != "https://static.olx.com.br/cd/listing/notFound.png"
           & id.nonEmpty) {
 
-
-        if (!cloudantClient.documentOnDatabase("automobiles", id)) {
-          cloudantClient.create_document("automobiles", id, thumbnail, mapOfImages, title,
-            price, model, brand, kilometers, description, typeOfCar, location,
-            typeOfShift, typeOfFuel, yearOfFabrication, color, endOfPlate, motorPower, hasGNV,
-            typeOfDirection, numberOfDoors, optionals, url)
+          if (!cloudantClient.documentOnDatabase("automobiles", id)) {
+            cloudantClient.create_document("automobiles", id, thumbnail, mapOfImages, title,
+              price, model, brand, kilometers, description, typeOfCar, location,
+              typeOfShift, typeOfFuel, yearOfFabrication, color, endOfPlate, motorPower, hasGNV,
+              typeOfDirection, numberOfDoors, optionals, url, publishData, publisher, isVerified, profile, cep,
+              characteristics, isHighlighted, averageOlxPrice, fipePrice, differenceToOlxAveragePrice, differenceToFipePrice)
           }
         }
       }
     }
   }
+}
