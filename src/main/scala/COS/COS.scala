@@ -86,10 +86,12 @@ class COS {
 
       val outputStream: OutputStream = new BufferedOutputStream(new FileOutputStream("CarImage.jpg"))
 
-      do {
+      val byte: Int = inputStream.read
+      outputStream.write(byte)
+      while (inputStream.read != -1) {
         val byte: Int = inputStream.read
         outputStream.write(byte)
-      } while (inputStream.read != -1)
+      }
 
       outputStream.close()
       inputStream.close()
@@ -104,8 +106,8 @@ class COS {
       return
     }
 
-    val partSize: Int = 1024 * 1024 * 5
-    val thresholdSize: Int = 1024 * 1024 * 5
+    val partSize: Long = 1024 * 1024 * 5
+    val thresholdSize: Long = 1024 * 1024 * 5
 
     val transferManager: TransferManager = TransferManagerBuilder.standard()
       .withS3Client(cosClient)

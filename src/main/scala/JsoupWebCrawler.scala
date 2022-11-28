@@ -11,7 +11,7 @@ import java.util
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-object Jsoup extends App {
+object JsoupWebCrawler extends App {
 
   val cloudantClient: CloudantCRUD = new CloudantCRUD
   val parser: Parser = new Parser

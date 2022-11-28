@@ -10,15 +10,11 @@ package object JSIMPLE {
     val fileSource: Source = Source.fromFile(file_path)
 
     for (line <- fileSource.getLines) {
-      try {
-        val s_line: Array[String] = line.split(": ")
-        stringMap +=
-          s_line(0).replaceAll("\"", "")
-            .replaceAll(",", "").trim -> s_line(1).replaceAll("\"", "")
-            .replaceAll(",", "")
-      } catch {
-        case _: Throwable => null
-      }
+      val s_line: Array[String] = line.split(": ")
+      stringMap +=
+        s_line(0).replaceAll("\"", "")
+          .replaceAll(",", "").trim -> s_line(1).replaceAll("\"", "")
+          .replaceAll(",", "")
     }
 
     fileSource.close
@@ -29,14 +25,7 @@ package object JSIMPLE {
 
   def parseDocResult(response: AllDocsResult): String = {
     var result: String = ""
-    response.getRows.forEach(row =>
-      try {
-        result = row.getKey
-
-      } catch {
-        case _: Throwable => null
-      }
-    )
+    response.getRows.forEach(row => result = row.getKey)
     result
   }
 }
