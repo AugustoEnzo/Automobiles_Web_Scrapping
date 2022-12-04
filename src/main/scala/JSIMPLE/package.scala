@@ -11,10 +11,14 @@ package object JSIMPLE {
 
     for (line <- fileSource.getLines) {
       val s_line: Array[String] = line.split(": ")
-      stringMap +=
-        s_line(0).replaceAll("\"", "")
-          .replaceAll(",", "").trim -> s_line(1).replaceAll("\"", "")
-          .replaceAll(",", "")
+      try {
+        stringMap +=
+          s_line(0).replaceAll("\"", "")
+            .replaceAll(",", "").trim -> s_line(1).replaceAll("\"", "")
+            .replaceAll(",", "")
+      } catch {
+        case _: Throwable =>
+      }
     }
 
     fileSource.close
