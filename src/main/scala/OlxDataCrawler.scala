@@ -61,7 +61,7 @@ object OlxDataCrawler extends App {
           then { properties += item("name").str -> item("value").str }
           else { propertiesArray += item("name").str -> item("values").arr.map(item => item("label").str) } )
 
-        val mapOfImages: mutable.ArrayBuffer[Option[String]] = if masterJson("ad")("images").objOpt.getOrElse(None) != None
+        val mapOfImages: mutable.ArrayBuffer[Option[String]] = if masterJson("ad")("images").objOpt.isDefined
           then masterJson("ad")("images").arr.map(image => image("thumbnail").strOpt) else ArrayBuffer(None) // Map of Images
 
         val title: Option[String] = masterJson("ad")("subject").strOpt // Title
@@ -85,7 +85,9 @@ object OlxDataCrawler extends App {
 
         val typeOfFuel: Option[String] = properties.get("fuel") // Type of Fuel
 
-        val yearOfFabrication: Option[Int] = properties.get("regdate").toString.toIntOption // Year of fabrication
+        val typeOfDirection: Option[String] = properties.get("car_steering") // Type of Direction
+
+        val yearOfFabrication: Option[String] = properties.get("regdate")// Year of fabrication
 
         val color: Option[String] = properties.get("carcolor") // Color
 
@@ -95,8 +97,6 @@ object OlxDataCrawler extends App {
 
         val hasGNV: Option[Boolean] = if properties.get("gnv_kit").toString == "Sim" then "true".toBooleanOption
         else "false".toBooleanOption // HasGNV
-
-        val typeOfDirection: Option[String] = properties.get("car_steering") // Type of Direction
 
         val numberOfDoors: Option[Int] = properties.get("doors").toString.toIntOption // Number of doors
 
@@ -176,7 +176,7 @@ object OlxDataCrawler extends App {
             )) else None
 
         val fundingInformation: Option[Map[String, Int | Double]] =
-          if masterJson("ad")("carSpecificData")("financing")("installment").objOpt.isDefined ||
+          if masterJson("ad")("carSpecificData")("financing")("installment").objOpt.isDefined &&
             masterJson("ad")("carSpecificData")("financing")("upfrontPayment").objOpt.isDefined
           then {
             val tempConditions: Array[String] = masterJson("ad")("carSpecificData")("financing")("installment")("value")
@@ -212,8 +212,8 @@ object OlxDataCrawler extends App {
 
         val tags: mutable.ArrayBuffer[String] = masterJson("ad")("tags").arr.map(tag => tag("label").str)
 
-        val averageOlxPrice: Option[Int] = innerPage.select(".hOrZdh:nth-child(1) .iDQboK").text
-          .replace("R$ ", "").replace(".", "").toIntOption
+        val averageOlxPrice: Option[Double] = innerPage.select(".hOrZdh:nth-child(1) .iDQboK").text
+          .replace("R$ ", "").replace(".", "").toDoubleOption
 
         val fipePrice: Option[Double] = if masterJson("ad")("abuyFipePrice").objOpt.getOrElse(None) != None
         then masterJson("ad")("abuyFipePrice")("fipePrice").numOpt else None
@@ -244,13 +244,15 @@ object OlxDataCrawler extends App {
 
         if (mapOfImages.nonEmpty & adId.nonEmpty) {
 
-//          if (!cloudantClient.documentOnDatabase("automobiles", id)) {
-//            cloudantClient.create_document("automobiles", id, thumbnail, mapOfImages, title,
-//              price, model, brand, kilometers, description, typeOfCar, location,
-//              typeOfShift, typeOfFuel, yearOfFabrication, color, endOfPlate, motorPower, hasGNV,
-//              typeOfDirection, numberOfDoors, optionals, url, publishData, publisher, isVerified, profile, cep,
-//              characteristics, isHighlighted, averageOlxPrice, fipePrice, differenceToOlxAveragePrice, differenceToFipePrice)
-//          }
+          if (!cloudantClient.documentOnDatabase("automobiles", adId)) {
+            cloudantClient.create_document("automobiles", adId, mapOfImages, title, model, brand, price,
+              financialInformation, kilometers, description, typeOfCar, typeOfShift, typeOfFuel, typeOfDirection,
+              yearOfFabrication, color, endOfPlate, motorPower, hasGNV, numberOfDoors, characteristics, optionals,
+              locationInformation, url, publishDate, profileInformation, fundingInformation, verificationInformation,
+              tags, averageOlxPrice, fipePrice, fipePriceRef, differenceToOlxAveragePrice, differenceToFipePrice,
+              vehicleSpecificData
+            )
+          }
         }
       }
     }

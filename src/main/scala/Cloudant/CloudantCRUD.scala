@@ -6,6 +6,7 @@ import com.ibm.cloud.sdk.core.service.exception.{NotFoundException, ServiceRespo
 import com.ibm.cloud.sdk.core.security.IamAuthenticator
 import JSIMPLE.{parse, parseDocResult}
 
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.{immutable, mutable}
 
 class CloudantCRUD {
@@ -47,57 +48,67 @@ class CloudantCRUD {
 
   // 3. Create a document ===============================================
   // Create the car document id
-  def create_document(database: String, id: String, Image: String, MapOfImages: mutable.Buffer[String], Title: String,
-                      Price: Option[Int], Model: String, Brand: String, Kilometers: Option[Int], Description: String,
-                      TypeOfCar: String, Location: String, TypeOfShift: String, TypeOfFuel: String,
-                      YearOfFabrication: Option[Int], Color: String, EndOfPlate: Option[Int], MotorPower: Option[Double],
-                      HasGNV: Option[Boolean], TypeOfDirection: String, NumberOfDoors: Option[Int], Optionals: String,
-                      URL: String, PublishDate: String, Publisher: String, IsVerified: Option[Boolean],
-                      Profile: String, CEP: String, Characteristics: String, IsHighlighted: Option[Boolean],
-                      AverageOlxPrice: Option[Int], FipePrice: Option[Int], DifferenceToOlxAveragePrice: Option[Int],
-                      DifferenceToFipePrice: Option[Int]) : Unit = {
+  def create_document(database: String, adId: String, mapOfImages: mutable.ArrayBuffer[Option[String]],
+                      title: Option[String], model: Option[String], brand: Option[String], price: Option[Double],
+                      financialInformation: Option[ArrayBuffer[String]], kilometers: Option[Double],
+                      description: Option[String], typeOfCar: Option[String], typeOfShift: Option[String],
+                      typeOfFuel: Option[String], typeOfDirection: Option[String], yearOfFabrication: Option[String],
+                      color: Option[String], endOfPlate: Option[Int], motorPower: Option[Double],
+                      hasGNV: Option[Boolean], numberOfDoors: Option[Int], characteristics: Map[String, Option[Boolean]],
+                      optionals: Option[ArrayBuffer[String]], locationInformation: ArrayBuffer[Option[String | Double]],
+                      url: String, publishDate: String,
+                      profileInformation: Option[Map[String, Option[String | Boolean | Double]]],
+                      fundingInformation: Option[Map[String, Int | Double]],
+                      verificationInformation: Map[String, Option[Boolean | String | ArrayBuffer[String]]],
+                      tags: ArrayBuffer[String], averageOlxPrice: Option[Double], fipePrice: Option[Double],
+                      fipePriceRef: Option[Map[String, Double]],
+                      differenceToOlxAveragePrice: Option[Double], differenceToFipePrice: Option[Double],
+                      vehicleSpecificData: mutable.HashMap[String, String]
+                     ) : Unit = {
 
     val documentIBM: Document = new Document
     // Setting id for the document is optional when "postDocument" method is used for CREATE.
     // When id is not provided the server will generate one for your document.
 
-    documentIBM.setId(id)
-    documentIBM.put("Thumbnail", Image)
-    documentIBM.put("Other images", MapOfImages)
-    documentIBM.put("Title", Title)
-    documentIBM.put("Model", Model)
-    documentIBM.put("Brand", Brand)
-    documentIBM.put("Price", Price)
-    documentIBM.put("Kilometers", Kilometers)
-    documentIBM.put("Description", Description)
-    documentIBM.put("Location", Location)
-    documentIBM.put("Type of Car", TypeOfCar)
-    documentIBM.put("Type of Shift", TypeOfShift)
-    documentIBM.put("Type of Fuel", TypeOfFuel)
-    documentIBM.put("Year of Fabrication", YearOfFabrication)
-    documentIBM.put("Color", Color)
-    documentIBM.put("End of Plate", EndOfPlate)
-    documentIBM.put("Motor Power", MotorPower)
-    documentIBM.put("Has VNG Kit", HasGNV)
-    documentIBM.put("Type of Direction", TypeOfDirection)
-    documentIBM.put("Number of doors", NumberOfDoors)
-    documentIBM.put("Optional", Optionals)
-    documentIBM.put("URL", URL)
-    documentIBM.put("Publish Date", PublishDate)
-    documentIBM.put("Publisher", Publisher)
-    documentIBM.put("Is verified", IsVerified)
-    documentIBM.put("Profile", Profile)
-    documentIBM.put("CEP", CEP)
-    documentIBM.put("Characteristics", Characteristics)
-    documentIBM.put("Is Highlighted", IsHighlighted)
-    documentIBM.put("Average Olx Price", AverageOlxPrice)
-    documentIBM.put("FIPE Price", FipePrice)
-    documentIBM.put("Difference to Olx Average Price", DifferenceToOlxAveragePrice)
-    documentIBM.put("Difference to FIPE Price", DifferenceToFipePrice)
+    documentIBM.setId(adId)
+    documentIBM.put("Images", mapOfImages)
+    documentIBM.put("Title", title.getOrElse(None))
+    documentIBM.put("Model", model.getOrElse(None))
+    documentIBM.put("Brand", brand.getOrElse(None))
+    documentIBM.put("Price", price.getOrElse(None))
+    documentIBM.put("Financial Information", financialInformation.getOrElse(None))
+    documentIBM.put("Kilometers", kilometers.getOrElse(None))
+    documentIBM.put("Description", description.getOrElse(None))
+    documentIBM.put("Location", locationInformation)
+    documentIBM.put("Type of Car", typeOfCar.getOrElse(None))
+    documentIBM.put("Type of Shift", typeOfShift.getOrElse(None))
+    documentIBM.put("Type of Fuel", typeOfFuel.getOrElse(None))
+    documentIBM.put("Type of Direction", typeOfDirection.getOrElse(None))
+    documentIBM.put("Year of Fabrication", yearOfFabrication.getOrElse(None))
+    documentIBM.put("Color", color.getOrElse(None))
+    documentIBM.put("End of Plate", endOfPlate.getOrElse(None))
+    documentIBM.put("Motor Power", motorPower.getOrElse(None))
+    documentIBM.put("Has VNG Kit", hasGNV.getOrElse(None))
+    documentIBM.put("Number of doors", numberOfDoors.getOrElse(None))
+    documentIBM.put("Characteristics", characteristics)
+    documentIBM.put("Optionals", optionals.getOrElse(None))
+    documentIBM.put("Location Information", locationInformation)
+    documentIBM.put("URL", url)
+    documentIBM.put("Publish Date", publishDate)
+    documentIBM.put("Profile Information", profileInformation.getOrElse(None))
+    documentIBM.put("Funding Information", fundingInformation.getOrElse(None))
+    documentIBM.put("Verification Information", verificationInformation)
+    documentIBM.put("Tags", tags)
+    documentIBM.put("Average Olx Price", averageOlxPrice.getOrElse(None))
+    documentIBM.put("FIPE Price", fipePrice.getOrElse(None))
+    documentIBM.put("FIPE Price Reference", fipePriceRef.getOrElse(None))
+    documentIBM.put("Difference to Olx Average Price", differenceToOlxAveragePrice.getOrElse(None))
+    documentIBM.put("Difference to FIPE Price", differenceToFipePrice.getOrElse(None))
+    documentIBM.put("Vehicle Specif Data", vehicleSpecificData)
 
     val documentOptions: PutDocumentOptions = new PutDocumentOptions.Builder()
       .db(database)
-      .docId(id)
+      .docId(adId)
       .document(documentIBM)
       .build
 
@@ -118,12 +129,12 @@ class CloudantCRUD {
       documentIBM.setRev(documentResponse.getRev)
 
       if (documentResponse.isOk) {
-        println(s"Document $id created.")
+        println(s"Document $adId created.")
 
       }
     } catch {
         case sre: ServiceResponseException => if (sre.getStatusCode == 412) {
-          println("Cannot create \"" + id + "\" Collection already exists.")
+          println("Cannot create \"" + adId + "\" Collection already exists.")
         }
       }
 
@@ -140,12 +151,12 @@ class CloudantCRUD {
       .getResult
     */
   }
-  def update_document(database: String, id: String, document: Document): Unit = {
+  def update_document(database: String, adId: String, document: Document): Unit = {
     try {
       val updateDocumentOptions: PutDocumentOptions =
         new PutDocumentOptions.Builder()
           .db(database)
-          .docId(id)
+          .docId(adId)
           .rev(document.getRev)
           .document(document)
           .build
@@ -159,7 +170,7 @@ class CloudantCRUD {
       println(s"You've updated the document: \n $document")
     } catch {
       case nfe: NotFoundException => println("Cannot update document because " +
-      s"either \"$database\" database or the \"$id\" " +
+      s"either \"$database\" database or the \"$adId\" " +
       "document was not found. \n" + s"$nfe")
     }
   }
