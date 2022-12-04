@@ -10,7 +10,6 @@ import java.io.File
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 import java.util
-import scala.collection.JavaConverters.*
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -62,8 +61,6 @@ object OlxDataCrawler extends App {
           then { properties += item("name").str -> item("value").str }
           else { propertiesArray += item("name").str -> item("values").arr.map(item => item("label").str) } )
 
-        println()
-
         val mapOfImages: mutable.ArrayBuffer[Option[String]] = if masterJson("ad")("images").objOpt.getOrElse(None) != None
           then masterJson("ad")("images").arr.map(image => image("thumbnail").strOpt) else ArrayBuffer(None) // Map of Images
 
@@ -73,15 +70,12 @@ object OlxDataCrawler extends App {
 
         val brand: Option[String] = properties.get("vehicle_brand") // Brand
 
-        val price: Option[Int] = masterJson("ad")("priceValue").strOpt.getOrElse(None).toString
-          .replace("R$ ","").replace(".", "").toIntOption // Price
+        val price: Option[Double] = masterJson("ad")("priceValue").strOpt.getOrElse(None).toString
+          .replace("R$ ","").replace(".", "").toDoubleOption // Price
 
         val financialInformation: Option[ArrayBuffer[String]] = propertiesArray.get("financial")
 
-        val isOwner: Option[Boolean] = if properties.get("owner").toString == "Sim"
-        then "true".toBooleanOption else "false".toBooleanOption // Is Unique Owner
-
-        val kilometers: Option[Int] = properties.get("mileage").toString.toIntOption // Kilometers
+        val kilometers: Option[Double] = properties.get("mileage").toString.toDoubleOption // Kilometers
 
         val description: Option[String] = masterJson("ad")("body").strOpt // Description
 
@@ -106,49 +100,80 @@ object OlxDataCrawler extends App {
 
         val numberOfDoors: Option[Int] = properties.get("doors").toString.toIntOption // Number of doors
 
+        val characteristics: Map[String, Option[Boolean]] = Map[String, Option[Boolean]](
+          properties.get("owner") match {
+            case Some("Sim") => "haveUniqueOwner" -> "true".toBooleanOption
+            case Some("Não") => "haveUniqueOwner" -> "false".toBooleanOption
+            case None => "haveUniqueOwner" -> "None".toBooleanOption
+            case Some(_) => "haveUniqueOwner" -> "None".toBooleanOption
+          },
+          properties.get("exchange") match {
+            case Some("Sim") => "acceptsExchanges" -> "true".toBooleanOption
+            case Some("Não") => "acceptsExchanges" -> "false".toBooleanOption
+            case None => "acceptsExchanges" -> "None".toBooleanOption
+            case Some(_) => "acceptsExchanges" -> "None".toBooleanOption
+          },
+          properties.get("owner_manual") match {
+            case Some("Sim") => "haveOwnerManual" -> "true".toBooleanOption
+            case Some("Não") => "haveOwnerManual" -> "false".toBooleanOption
+            case None => "haveOwnerManual" -> "None".toBooleanOption
+            case Some(_) => "haveOwnerManual" -> "None".toBooleanOption
+          },
+          properties.get("dealership_review") match {
+            case Some("Sim") => "haveDealershipReview" -> "true".toBooleanOption
+            case Some("Não") => "haveDealershipReview" -> "false".toBooleanOption
+            case None => "haveDealershipReview" -> "None".toBooleanOption
+            case Some(_) => "haveDealershipReview" -> "None".toBooleanOption
+          },
+          properties.get("haveWarranty") match {
+            case Some("Sim") => "haveWarranty" -> "true".toBooleanOption
+            case Some("Não") => "haveWarranty" -> "false".toBooleanOption
+            case None => "haveWarranty" -> "None".toBooleanOption
+            case Some(_) => "haveWarranty" -> "None".toBooleanOption
+          },
+          "isFinanceable" -> masterJson("ad")("carSpecificData")("isFinanceable").boolOpt,
+          "isFeatured" -> masterJson("ad")("isFeatured").boolOpt
+        )
+
         val optionals: Option[ArrayBuffer[String]] = propertiesArray.get("car_features") // Optionals
 
-        val location: ArrayBuffer[Any] =
+        val locationInformation: ArrayBuffer[Option[String | Double ]] =
           mutable.ArrayBuffer(
             masterJson("ad")("location")("address").strOpt,
-            masterJson("ad")("location")("neighbourhood").str,
-            masterJson("ad")("location")("neighbourhoodId").num.toInt,
-            masterJson("ad")("location")("municipality").str,
-            masterJson("ad")("location")("municipalityId").num.toInt,
-            masterJson("ad")("location")("zipcode").str,
-            masterJson("ad")("location")("mapLati").num.toInt,
-            masterJson("ad")("location")("mapLong").num.toInt,
-            masterJson("ad")("location")("uf").str,
-            masterJson("ad")("location")("ddd").str,
-            masterJson("ad")("location")("zoneId").num.toInt,
-            masterJson("ad")("location")("zone").str,
-            masterJson("ad")("location")("region").str
+            masterJson("ad")("location")("neighbourhood").strOpt,
+            masterJson("ad")("location")("neighbourhoodId").numOpt,
+            masterJson("ad")("location")("municipality").strOpt,
+            masterJson("ad")("location")("municipalityId").numOpt,
+            masterJson("ad")("location")("zipcode").strOpt,
+            masterJson("ad")("location")("mapLati").numOpt,
+            masterJson("ad")("location")("mapLong").numOpt,
+            masterJson("ad")("location")("uf").strOpt,
+            masterJson("ad")("location")("ddd").strOpt,
+            masterJson("ad")("location")("zoneId").numOpt,
+            masterJson("ad")("location")("zone").strOpt,
+            masterJson("ad")("location")("region").strOpt
           )
 
         val url: String = carIterator.select("div > a").attr("href") // URL
 
-        val id: String = masterJson("ad")("adId").num.toString // ID
+        val adId: String = masterJson("ad")("adId").num.toString // ID
 
-        val publishData: String = innerPage.select(".hSZkck").text
-          .replace("Publicado em ", "").replace(" às ", ":") // Publish Date
+        val publishDate: String = innerPage.select(".hSZkck").text
+          .replace("Publicado em ", "").replace(" às ", "T") // Publish Date
 
-        val accountId: Int = masterJson("ad")("user")("accountId").num.toInt // Id of user account
-
-        val isPhoneVerified: Option[Boolean] = masterJson("ad")("phone")("phoneVerified").boolOpt // Option of the user Boolean
-
-        val acceptExchanges: Option[Boolean] = if properties.get("exchange").toString == "Sim" // Does the user accept exchanges for the vehicle
-          then "true".toBooleanOption else "false".toBooleanOption
-
-        val haveOwnerManual: Option[Boolean] = if properties.get("owner_manual").toString == "Sim" // Does the owner have the vehicle's owner manual
-          then "true".toBooleanOption else "false".toBooleanOption
-
-        val makingDealershipReview: Option[Boolean] = if properties.get("dealership_review").toString == "Sim" // Is the owner making the dealerships reviews
-          then "true".toBooleanOption else "false".toBooleanOption
-
-        val withWarranty: Option[Boolean] = if properties.get("warranty").toString == "Sim" // Are the vehicle in warranty period
-          then "true".toBooleanOption else "false".toBooleanOption
-
-        val isFinanceable: Option[Boolean] = masterJson("ad")("carSpecificData")("isFinanceable").boolOpt
+        val profileInformation: Option[Map[String, Option[String | Boolean | Double]]] = if masterJson("ad")("sellerHistory").objOpt.isDefined
+          then Option(Map(
+              "accountId" -> masterJson("ad")("sellerHistory")("id").strOpt,
+              "userId" -> masterJson("ad")("user")("userId").numOpt,
+              "name" -> masterJson("ad")("user")("name").strOpt,
+              "isPhoneVerified" -> masterJson("ad")("phone")("phoneVerified").boolOpt,
+              "salesAmounts" -> masterJson("ad")("sellerHistory")("salesAmounts").numOpt,
+              "canceledSalesAmounts" -> masterJson("ad")("sellerHistory")("canceledSalesAmounts").numOpt,
+              "totalDispatchTimeInMinutes" -> masterJson("ad")("sellerHistory")("totalDispatchTimeInMinutes").numOpt,
+              "averageDispatchTime" -> masterJson("ad")("sellerHistory")("averageDispatchTime").strOpt.get.replace(" minutos", "").toDoubleOption,
+              if masterJson("ad")("user")("configs").objOpt.isDefined
+                then "proAccount" -> masterJson("ad")("user")("configs")("proAccount").boolOpt else "proAccount" -> None
+            )) else None
 
         val fundingInformation: Option[Map[String, Int | Double]] =
           if masterJson("ad")("carSpecificData")("financing")("installment").objOpt.isDefined ||
@@ -167,14 +192,7 @@ object OlxDataCrawler extends App {
             ))
           } else None
 
-        val publisherName: String = masterJson("ad")("user")("name").str // Publisher
-
-        val publisherId: Int = masterJson("ad")("user")("userId").num.toInt // PublisherId
-
-        val isPro: Option[Boolean] = if masterJson("ad")("user")("configs").objOpt.isDefined
-          then masterJson("ad")("user")("configs")("proAccount").boolOpt else None // Is the user a professional seller in Olx
-
-        val verificationInfomartion: Map[String, Option[Boolean | String | ArrayBuffer[String]]] = if masterJson("ad")("vehicleReport").objOpt.isDefined
+        val verificationInformation: Map[String, Option[Boolean | String | ArrayBuffer[String]]] = if masterJson("ad")("vehicleReport").objOpt.isDefined
           then Map(
             "isVerified" -> masterJson("ad")("vehicleReport")("enabled").boolOpt,
             if masterJson("ad")("vehicleReport")("description").strOpt.isDefined then
@@ -190,12 +208,9 @@ object OlxDataCrawler extends App {
             if masterJson("ad")("vehicleReport")("tags").arrOpt.isDefined then
               "tags" -> Option(masterJson("ad")("vehicleReport")("tags").arr.map(tag => tag("label").str))
             else "tags" -> None
-          ) else null // IsVerified
+          ) else null
 
         val tags: mutable.ArrayBuffer[String] = masterJson("ad")("tags").arr.map(tag => tag("label").str)
-
-        val isHighlighted: Option[Boolean] = if (innerPage.select(".iAXfrR").text == "DESTAQUE")
-          "true".toBooleanOption else "false".toBooleanOption
 
         val averageOlxPrice: Option[Int] = innerPage.select(".hOrZdh:nth-child(1) .iDQboK").text
           .replace("R$ ", "").replace(".", "").toIntOption
@@ -217,7 +232,7 @@ object OlxDataCrawler extends App {
               "vehicle_count" -> masterJson("ad")("abuyPriceRef")("vehicle_count").num,
             )) else None
 
-        val differenceToOlxAveragePrice: Option[Int] = if (price.isDefined & averageOlxPrice.isDefined)
+        val differenceToOlxAveragePrice: Option[Double] = if (price.isDefined & averageOlxPrice.isDefined)
           Some(price.get - averageOlxPrice.get) else None
 
         val differenceToFipePrice: Option[Double] = if (price.isDefined & fipePrice.isDefined)
@@ -227,7 +242,7 @@ object OlxDataCrawler extends App {
         masterJson("ad")("vehicleSpecificData").arr
           .map(item => vehicleSpecificData += item("key").str -> item("value").str)
 
-        if (mapOfImages.nonEmpty & id.nonEmpty) {
+        if (mapOfImages.nonEmpty & adId.nonEmpty) {
 
 //          if (!cloudantClient.documentOnDatabase("automobiles", id)) {
 //            cloudantClient.create_document("automobiles", id, thumbnail, mapOfImages, title,
