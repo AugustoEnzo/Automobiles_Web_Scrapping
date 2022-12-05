@@ -12,7 +12,7 @@ import scala.collection.{immutable, mutable}
 class CloudantCRUD {
   // 1. Create a client with `CLOUDANT` default service name ============
   val credentials: Map[String, String] =
-    parse("/home/ozne-otsugua/IdeaProjects/Automobiles Web Scrapping/cloudant_iam_key.json")
+    parse("cloudant_iam_key.json")
 
   val authenticator: IamAuthenticator = new IamAuthenticator.Builder()
     .apikey(credentials("apikey"))
