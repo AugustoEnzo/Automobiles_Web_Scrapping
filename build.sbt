@@ -1,6 +1,6 @@
-ThisBuild / version := "1.2.3-SNAPSHOT"
+ThisBuild / version := "2.0.5.1-SNAPSHOT"
 
-ThisBuild / scalaVersion := "3.2.1"
+ThisBuild / scalaVersion := "2.13.0"
 
 lazy val root = (project in file("."))
   .settings(
@@ -11,3 +11,4 @@ libraryDependencies += "org.jsoup" % "jsoup" % "1.15.3"
 libraryDependencies += "com.ibm.cloud" % "cloudant" % "0.4.0"
 libraryDependencies += "com.ibm.cos" % "ibm-cos-java-sdk" % "2.12.1"
 libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0"
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.8.0"

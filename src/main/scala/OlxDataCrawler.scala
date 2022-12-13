@@ -1,23 +1,20 @@
-import Cloudant.CloudantCRUD
-import ParseTitle.Parser
-import com.google.gson.{JsonObject, JsonParser}
-import org.jsoup.{HttpStatusException, Jsoup}
+//import Cloudant.CloudantCRUD
+import Mongo.CRUD
+import Mongo.Cast
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
+import org.jsoup.{HttpStatusException, Jsoup}
 import ujson.Value.Value
 
-import java.io.File
-import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Paths}
-import java.util
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.immutable.HashMap
+import scala.collection.{immutable, mutable}
 
 
 object OlxDataCrawler extends App {
 
-  val cloudantClient: CloudantCRUD = new CloudantCRUD
-  val parser: Parser = new Parser
+  //  val cloudantClient: CloudantCRUD = new CloudantCRUD
+  val mongoOps: CRUD = new CRUD()
+  val mongoCast: Cast = new Cast()
 
   private val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios")
     .data("query", "Java")
@@ -54,18 +51,18 @@ object OlxDataCrawler extends App {
           val masterJson: Value = ujson.read(innerPage.getElementsByAttributeValue("type", "text/plain").attr("data-json").replace("&quot", ""))
 
           val properties: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-          val propertiesArray: mutable.HashMap[String, ArrayBuffer[String]] = new mutable.HashMap[String, ArrayBuffer[String]]()
+          val propertiesList: mutable.HashMap[String, List[String]] = new mutable.HashMap[String, List[String]]()
 
-          masterJson("ad")("properties").arr.map(item => if item("values").isNull
-          then {
+          masterJson("ad")("properties").arr.map(item => if (item("values").isNull) {
             properties += item("name").str -> item("value").str
           }
           else {
-            propertiesArray += item("name").str -> item("values").arr.map(item => item("label").str)
+            propertiesList += item("name").str -> item("values").arr.map(item => item("label").str).toList
           })
 
-          val mapOfImages: mutable.ArrayBuffer[Option[String]] = if masterJson("ad")("images").objOpt.isDefined
-          then masterJson("ad")("images").arr.map(image => image("thumbnail").strOpt) else ArrayBuffer(None) // Map of Images
+          val mapOfImages: List[Option[String]] = if (masterJson("ad")("images").arrOpt.isDefined) {
+            masterJson("ad")("images").arr.map(image => image("original").strOpt).toList
+          } else { None.toList } // Map of Images
 
           val title: Option[String] = masterJson("ad")("subject").strOpt // Title
 
@@ -76,7 +73,7 @@ object OlxDataCrawler extends App {
           val price: Option[Double] = masterJson("ad")("priceValue").strOpt.getOrElse(None).toString
             .replace("R$ ", "").replace(".", "").toDoubleOption // Price
 
-          val financialInformation: Option[ArrayBuffer[String]] = propertiesArray.get("financial")
+          val financialInformation: Option[List[String]] = propertiesList.get("financial")
 
           val kilometers: Option[Double] = properties.get("mileage").toString.toDoubleOption // Kilometers
 
@@ -98,8 +95,8 @@ object OlxDataCrawler extends App {
 
           val motorPower: Option[Double] = properties.get("motorpower").toString.toDoubleOption // Motor power
 
-          val hasGNV: Option[Boolean] = if properties.get("gnv_kit").toString == "Sim" then "true".toBooleanOption
-          else "false".toBooleanOption // HasGNV
+          val hasGNV: Option[Boolean] = if (properties.get("gnv_kit").toString == "Sim") {"true".toBooleanOption}
+          else { "false".toBooleanOption } // HasGNV
 
           val numberOfDoors: Option[Int] = properties.get("doors").toString.toIntOption // Number of doors
 
@@ -138,23 +135,23 @@ object OlxDataCrawler extends App {
             "isFeatured" -> masterJson("ad")("isFeatured").boolOpt
           )
 
-          val optionals: Option[ArrayBuffer[String]] = propertiesArray.get("car_features") // Optionals
+          val optionals: Option[List[String]] = propertiesList.get("car_features") // Optionals
 
-          val locationInformation: ArrayBuffer[Option[String | Double]] =
-            mutable.ArrayBuffer(
-              masterJson("ad")("location")("address").strOpt,
-              masterJson("ad")("location")("neighbourhood").strOpt,
-              masterJson("ad")("location")("neighbourhoodId").numOpt,
-              masterJson("ad")("location")("municipality").strOpt,
-              masterJson("ad")("location")("municipalityId").numOpt,
-              masterJson("ad")("location")("zipcode").strOpt,
-              masterJson("ad")("location")("mapLati").numOpt,
-              masterJson("ad")("location")("mapLong").numOpt,
-              masterJson("ad")("location")("uf").strOpt,
-              masterJson("ad")("location")("ddd").strOpt,
-              masterJson("ad")("location")("zoneId").numOpt,
-              masterJson("ad")("location")("zone").strOpt,
-              masterJson("ad")("location")("region").strOpt
+          val locationInformation: Map[String, Option[Any]] =
+            Map(
+              "address" -> masterJson("ad")("location")("address").strOpt,
+              "neighbourhood" -> masterJson("ad")("location")("neighbourhood").strOpt,
+              "neighbourhoodId" -> masterJson("ad")("location")("neighbourhoodId").numOpt,
+              "municipality" -> masterJson("ad")("location")("municipality").strOpt,
+              "municipalityId" -> masterJson("ad")("location")("municipalityId").numOpt,
+              "zipcode" -> masterJson("ad")("location")("zipcode").strOpt,
+              "mapLati" -> masterJson("ad")("location")("mapLati").numOpt,
+              "mapLong" -> masterJson("ad")("location")("mapLong").numOpt,
+              "uf" -> masterJson("ad")("location")("uf").strOpt,
+              "ddd" -> masterJson("ad")("location")("ddd").strOpt,
+              "zoneId" -> masterJson("ad")("location")("zoneId").numOpt,
+              "zone" -> masterJson("ad")("location")("zone").strOpt,
+              "region" -> masterJson("ad")("location")("region").strOpt
             )
 
           val url: String = carIterator.select("div > a").attr("href") // URL
@@ -164,8 +161,9 @@ object OlxDataCrawler extends App {
           val publishDate: String = innerPage.select(".hSZkck").text
             .replace("Publicado em ", "").replace(" às ", "T") // Publish Date
 
-          val profileInformation: Option[Map[String, Option[String | Boolean | Double]]] = if masterJson("ad")("sellerHistory").objOpt.isDefined
-          then Option(Map(
+          val profileInformation: Map[String, Option[Any]] = if ( masterJson("ad")("sellerHistory").objOpt.isDefined )
+          {
+            Map(
               "accountId" -> masterJson("ad")("sellerHistory")("id").strOpt,
               "userId" -> masterJson("ad")("user")("userId").numOpt,
               "name" -> masterJson("ad")("user")("name").strOpt,
@@ -174,18 +172,19 @@ object OlxDataCrawler extends App {
               "canceledSalesAmounts" -> masterJson("ad")("sellerHistory")("canceledSalesAmounts").numOpt,
               "totalDispatchTimeInMinutes" -> masterJson("ad")("sellerHistory")("totalDispatchTimeInMinutes").numOpt,
               "averageDispatchTime" -> masterJson("ad")("sellerHistory")("averageDispatchTime").strOpt.get.replace(" minutos", "").toDoubleOption,
-              if masterJson("ad")("user")("configs").objOpt.isDefined
-              then "proAccount" -> masterJson("ad")("user")("configs")("proAccount").boolOpt else "proAccount" -> None
-            )) else None
+              if ( masterJson("ad")("user")("configs").objOpt.isDefined )
+                { "proAccount" -> masterJson("ad")("user")("configs")("proAccount").boolOpt } else { "proAccount" -> None }
+            )
+          } else null
 
-          val fundingInformation: Option[Map[String, Int | Double]] =
-            if masterJson("ad")("carSpecificData")("financing")("installment").objOpt.isDefined &&
-              masterJson("ad")("carSpecificData")("financing")("upfrontPayment").objOpt.isDefined
-            then {
+          val fundingInformation: Option[Map[String, Double]] =
+            if ( masterJson("ad")("carSpecificData")("financing")("installment").objOpt.isDefined &&
+              masterJson("ad")("carSpecificData")("financing")("upfrontPayment").objOpt.isDefined )
+            {
               val tempConditions: Array[String] = masterJson("ad")("carSpecificData")("financing")("installment")("value")
                 .str.split("x")
               Option(Map(
-                "funding installments" -> tempConditions(0).toInt,
+                "funding installments" -> tempConditions(0).toDouble,
                 "funding installment value" -> tempConditions(1).replace("R$ ", "")
                   .replace(".", "").replace(",", ".")
                   .replace("*", "").toDouble,
@@ -195,45 +194,47 @@ object OlxDataCrawler extends App {
               ))
             } else None
 
-          val verificationInformation: Map[String, Option[Boolean | String | ArrayBuffer[String]]] = if masterJson("ad")("vehicleReport").objOpt.isDefined
-          then Map(
+          val verificationInformation: Map[String, Option[Any]] = if ( masterJson("ad")("vehicleReport").objOpt.isDefined )
+          {
+            Map(
               "isVerified" -> masterJson("ad")("vehicleReport")("enabled").boolOpt,
-              if masterJson("ad")("vehicleReport")("description").strOpt.isDefined then
-                "Query date" -> Option("[0-9]{2}/+[0-9]{2}/+[0-9]{4}".r.findFirstIn(masterJson("ad")("vehicleReport")("description").strOpt.get
-                  .replace("Verifique se os dados do Histórico Veicular são os mesmos informados no anúncio. ", "")
-                  .strip()).get.replace("/", "-").reverse.concat("T" + "[0-9]{2}:+[0-9]{2}:+[0-9]{2}".r.findFirstIn(masterJson("ad")("vehicleReport")("description").strOpt.get
-                  .replace("Verifique se os dados do Histórico Veicular são os mesmos informados no anúncio. ", "")
-                  .strip()).get))
-              else "description" -> None,
-              if masterJson("ad")("vehicleReport")("reportLink").strOpt.isDefined then
-                "reportLink" -> masterJson("ad")("vehicleReport")("reportLink").strOpt
-              else "reportLink" -> None,
-              if masterJson("ad")("vehicleReport")("tags").arrOpt.isDefined then
-                "tags" -> Option(masterJson("ad")("vehicleReport")("tags").arr.map(tag => tag("label").str))
-              else "tags" -> None
-            ) else null
-
-          val tags: mutable.ArrayBuffer[String] = masterJson("ad")("tags").arr.map(tag => tag("label").str)
+              if ( masterJson("ad")("vehicleReport")("description").strOpt.isDefined )
+                {
+                  "Query date" -> Option("[0-9]{2}/+[0-9]{2}/+[0-9]{4}".r.findFirstIn(masterJson("ad")("vehicleReport")("description").strOpt.get
+                    .replace("Verifique se os dados do Histórico Veicular são os mesmos informados no anúncio. ", "")
+                    .strip()).get.replace("/", "-").reverse.concat("T" + "[0-9]{2}:+[0-9]{2}:+[0-9]{2}".r.findFirstIn(masterJson("ad")("vehicleReport")("description").strOpt.get
+                    .replace("Verifique se os dados do Histórico Veicular são os mesmos informados no anúncio. ", "")
+                    .strip()).get))
+                } else "description" -> None,
+              if ( masterJson("ad")("vehicleReport")("reportLink").strOpt.isDefined )
+                { "reportLink" -> masterJson("ad")("vehicleReport")("reportLink").strOpt } else { "reportLink" -> None },
+              if ( masterJson("ad")("vehicleReport")("tags").arrOpt.isDefined )
+                { "tags" -> Option(masterJson("ad")("vehicleReport")("tags").arr.map(tag => tag("label").str).toList) }
+              else { "tags" -> None }
+            )
+          } else null
 
           val averageOlxPrice: Option[Double] = innerPage.select(".hOrZdh:nth-child(1) .iDQboK").text
             .replace("R$ ", "").replace(".", "").toDoubleOption
 
-          val fipePrice: Option[Double] = if masterJson("ad")("abuyFipePrice").objOpt.getOrElse(None) != None
-          then masterJson("ad")("abuyFipePrice")("fipePrice").numOpt else None
+          val fipePrice: Option[Double] = if ( masterJson("ad")("abuyFipePrice").objOpt.isDefined )
+           { masterJson("ad")("abuyFipePrice")("fipePrice").numOpt } else None
 
-          val fipePriceRef: Option[Map[String, Double]] = if masterJson("ad")("abuyPriceRef").objOpt.getOrElse(None) != None
-          then Option(Map(
-              "year_month_ref" -> masterJson("ad")("abuyPriceRef")("year_month_ref").num,
-              "price_min" -> masterJson("ad")("abuyPriceRef")("price_min").num,
-              "price_p25" -> masterJson("ad")("abuyPriceRef")("price_p25").num,
-              "price_p33" -> masterJson("ad")("abuyPriceRef")("price_p33").num,
-              "price_p50" -> masterJson("ad")("abuyPriceRef")("price_p50").num,
-              "price_p66" -> masterJson("ad")("abuyPriceRef")("price_p66").num,
-              "price_p75" -> masterJson("ad")("abuyPriceRef")("price_p75").num,
-              "price_max" -> masterJson("ad")("abuyPriceRef")("price_max").num,
-              "price_stddev" -> masterJson("ad")("abuyPriceRef")("price_stddev").num,
-              "vehicle_count" -> masterJson("ad")("abuyPriceRef")("vehicle_count").num,
-            )) else None
+          val fipePriceRef: Map[String, Double] = if ( masterJson("ad")("abuyPriceRef").objOpt.isDefined )
+           {
+             Map(
+               "year_month_ref" -> masterJson("ad")("abuyPriceRef")("year_month_ref").num,
+               "price_min" -> masterJson("ad")("abuyPriceRef")("price_min").num,
+               "price_p25" -> masterJson("ad")("abuyPriceRef")("price_p25").num,
+               "price_p33" -> masterJson("ad")("abuyPriceRef")("price_p33").num,
+               "price_p50" -> masterJson("ad")("abuyPriceRef")("price_p50").num,
+               "price_p66" -> masterJson("ad")("abuyPriceRef")("price_p66").num,
+               "price_p75" -> masterJson("ad")("abuyPriceRef")("price_p75").num,
+               "price_max" -> masterJson("ad")("abuyPriceRef")("price_max").num,
+               "price_stddev" -> masterJson("ad")("abuyPriceRef")("price_stddev").num,
+               "vehicle_count" -> masterJson("ad")("abuyPriceRef")("vehicle_count").num,
+             )
+           } else null
 
           val differenceToOlxAveragePrice: Option[Double] = if (price.isDefined & averageOlxPrice.isDefined)
             Some(price.get - averageOlxPrice.get) else None
@@ -243,19 +244,17 @@ object OlxDataCrawler extends App {
 
           val vehicleSpecificData: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
           masterJson("ad")("vehicleSpecificData").arr
-            .map(item => vehicleSpecificData += item("key").str -> item("value").str)
+            .foreach(item => vehicleSpecificData.addOne(item("key").str, item("value").str))
 
           if (mapOfImages.nonEmpty & adId.nonEmpty) {
 
-            if (!cloudantClient.documentOnDatabase("automobiles", adId)) {
-              cloudantClient.create_document("automobiles", adId, mapOfImages, title, model, brand, price,
-                financialInformation, kilometers, description, typeOfCar, typeOfShift, typeOfFuel, typeOfDirection,
-                yearOfFabrication, color, endOfPlate, motorPower, hasGNV, numberOfDoors, characteristics, optionals,
-                locationInformation, url, publishDate, profileInformation, fundingInformation, verificationInformation,
-                tags, averageOlxPrice, fipePrice, fipePriceRef, differenceToOlxAveragePrice, differenceToFipePrice,
-                vehicleSpecificData
-              )
-            }
+            mongoOps.createAndInsert(adId, mongoCast.cast(
+              adId, mapOfImages, title, model, brand, price,
+              financialInformation, kilometers, description, typeOfCar, typeOfShift, typeOfFuel, typeOfDirection,
+              yearOfFabrication, color, endOfPlate, motorPower, hasGNV, numberOfDoors, characteristics, optionals,
+              locationInformation, url, publishDate, profileInformation, fundingInformation, verificationInformation,
+              averageOlxPrice, fipePrice, fipePriceRef, differenceToOlxAveragePrice, differenceToFipePrice,
+              vehicleSpecificData))
           }
         } catch {
           case e: HttpStatusException => println(s"error 404 trying to fetch page: $e")
