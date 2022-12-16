@@ -19,7 +19,7 @@ object OlxDataCrawler extends App {
   private val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios")
     .data("query", "Java")
     .userAgent("Mozilla")
-    .timeout(10000)
+    .timeout(20000)
     .get()
 
   private val docMaxPage = doc.select("#listing-main-content-slot > div.h3us20-6.ehQTxA > div > div > div.h3us20-3.csYflq > div > div.sc-EHOje.kRemsz > p").text.split(" ")(3)
@@ -161,9 +161,9 @@ object OlxDataCrawler extends App {
           val publishDate: String = innerPage.select(".hSZkck").text
             .replace("Publicado em ", "").replace(" às ", "T") // Publish Date
 
-          val profileInformation: Map[String, Option[Any]] = if ( masterJson("ad")("sellerHistory").objOpt.isDefined )
+          val profileInformation: Option[Map[String, Option[Any]]] = if ( masterJson("ad")("sellerHistory").objOpt.isDefined )
           {
-            Map(
+            Option(Map(
               "accountId" -> masterJson("ad")("sellerHistory")("id").strOpt,
               "userId" -> masterJson("ad")("user")("userId").numOpt,
               "name" -> masterJson("ad")("user")("name").strOpt,
@@ -174,8 +174,8 @@ object OlxDataCrawler extends App {
               "averageDispatchTime" -> masterJson("ad")("sellerHistory")("averageDispatchTime").strOpt.get.replace(" minutos", "").toDoubleOption,
               if ( masterJson("ad")("user")("configs").objOpt.isDefined )
                 { "proAccount" -> masterJson("ad")("user")("configs")("proAccount").boolOpt } else { "proAccount" -> None }
-            )
-          } else null
+            ))
+          } else None
 
           val fundingInformation: Option[Map[String, Double]] =
             if ( masterJson("ad")("carSpecificData")("financing")("installment").objOpt.isDefined &&
@@ -194,9 +194,9 @@ object OlxDataCrawler extends App {
               ))
             } else None
 
-          val verificationInformation: Map[String, Option[Any]] = if ( masterJson("ad")("vehicleReport").objOpt.isDefined )
+          val verificationInformation: Option[Map[String, Option[Any]]] = if ( masterJson("ad")("vehicleReport").objOpt.isDefined )
           {
-            Map(
+            Option(Map(
               "isVerified" -> masterJson("ad")("vehicleReport")("enabled").boolOpt,
               if ( masterJson("ad")("vehicleReport")("description").strOpt.isDefined )
                 {
@@ -211,8 +211,8 @@ object OlxDataCrawler extends App {
               if ( masterJson("ad")("vehicleReport")("tags").arrOpt.isDefined )
                 { "tags" -> Option(masterJson("ad")("vehicleReport")("tags").arr.map(tag => tag("label").str).toList) }
               else { "tags" -> None }
-            )
-          } else null
+            ))
+          } else None
 
           val averageOlxPrice: Option[Double] = innerPage.select(".hOrZdh:nth-child(1) .iDQboK").text
             .replace("R$ ", "").replace(".", "").toDoubleOption
@@ -220,9 +220,9 @@ object OlxDataCrawler extends App {
           val fipePrice: Option[Double] = if ( masterJson("ad")("abuyFipePrice").objOpt.isDefined )
            { masterJson("ad")("abuyFipePrice")("fipePrice").numOpt } else None
 
-          val fipePriceRef: Map[String, Double] = if ( masterJson("ad")("abuyPriceRef").objOpt.isDefined )
+          val fipePriceRef: Option[Map[String, Double]] = if ( masterJson("ad")("abuyPriceRef").objOpt.isDefined )
            {
-             Map(
+             Option(Map(
                "year_month_ref" -> masterJson("ad")("abuyPriceRef")("year_month_ref").num,
                "price_min" -> masterJson("ad")("abuyPriceRef")("price_min").num,
                "price_p25" -> masterJson("ad")("abuyPriceRef")("price_p25").num,
@@ -233,8 +233,8 @@ object OlxDataCrawler extends App {
                "price_max" -> masterJson("ad")("abuyPriceRef")("price_max").num,
                "price_stddev" -> masterJson("ad")("abuyPriceRef")("price_stddev").num,
                "vehicle_count" -> masterJson("ad")("abuyPriceRef")("vehicle_count").num,
-             )
-           } else null
+             ))
+           } else None
 
           val differenceToOlxAveragePrice: Option[Double] = if (price.isDefined & averageOlxPrice.isDefined)
             Some(price.get - averageOlxPrice.get) else None

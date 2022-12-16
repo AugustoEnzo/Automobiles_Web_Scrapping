@@ -7,11 +7,8 @@ import org.mongodb.scala.model.Projections._
 import org.mongodb.scala.model.Sorts._
 import org.mongodb.scala.model.Updates._
 import org.mongodb.scala.model._
-
 import org.mongodb.scala.result.InsertOneResult
 
-import java.util
-import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 
 class CRUD {
   private val mongoClient: MongoClient = new Connection().client

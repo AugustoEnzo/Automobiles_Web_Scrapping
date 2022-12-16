@@ -14,11 +14,11 @@ class Cast {
            color: Option[String], endOfPlate: Option[Int], motorPower: Option[Double],
            hasGNV: Option[Boolean], numberOfDoors: Option[Int], characteristics: Map[String, Option[Boolean]],
            optionals: Option[List[String]], locationInformation: Map[String, Option[Any]],
-           url: String, publishDate: String, profileInformation: Map[String, Option[Any]],
+           url: String, publishDate: String, profileInformation: Option[Map[String, Option[Any]]],
            fundingInformation: Option[Map[String, Double]],
-           verificationInformation: Map[String, Option[Any]],
+           verificationInformation: Option[Map[String, Option[Any]]],
            averageOlxPrice: Option[Double], fipePrice: Option[Double],
-           fipePriceRef: Map[String, Double], differenceToOlxAveragePrice: Option[Double],
+           fipePriceRef: Option[Map[String, Double]], differenceToOlxAveragePrice: Option[Double],
            differenceToFipePrice: Option[Double], vehicleSpecificData: mutable.HashMap[String, String]): Document = {
 
     val tempMapOfImages: BsonArray = new BsonArray
@@ -65,13 +65,15 @@ class Cast {
       })
 
     val tempProfileInformation: BsonDocument = new BsonDocument
-      profileInformation.foreach(profile => if (profile._2.isDefined) {
+    if (profileInformation.isDefined) {
+      profileInformation.get.foreach(profile => if (profile._2.isDefined) {
         profile._2.get match {
           case d: Double => tempProfileInformation.append(profile._1, BsonDouble(d))
           case s: String => tempProfileInformation.append(profile._1, BsonString(s))
           case _ => null
         }
       })
+    }
 
     val tempFundingInformation: BsonDocument = new BsonDocument
       if (fundingInformation.isDefined) {
@@ -79,20 +81,24 @@ class Cast {
       }
 
     val tempVerificationInformation: BsonDocument = new BsonDocument
-      verificationInformation.foreach(verification => if (verification._2.isDefined) {
+    if (profileInformation.isDefined) {
+      verificationInformation.get.foreach(verification => if (verification._2.isDefined) {
         verification._2.get match {
           case b: Boolean => tempVerificationInformation.append(verification._1, BsonBoolean(b))
           case s: String => tempVerificationInformation.append(verification._1, BsonString(s))
           case list: List[String] => tempVerificationInformation.append(verification._1, BsonArray(list))
         }
       })
+    }
 
     val tempAverageOlxPrice: BsonDouble = if (averageOlxPrice.isDefined) BsonDouble(averageOlxPrice.get) else BsonDouble(-1)
 
     val tempFipePrice: BsonDouble = if (fipePrice.isDefined) BsonDouble(fipePrice.get) else BsonDouble(-1)
 
     val tempFipePriceRef: BsonDocument = new BsonDocument
-      fipePriceRef.foreach(reference => tempFipePriceRef.append(reference._1, BsonDouble(reference._2)))
+    if (fipePriceRef.isDefined) {
+      fipePriceRef.get.foreach(reference => tempFipePriceRef.append(reference._1, BsonDouble(reference._2)))
+    }
 
     val tempDifferenceToOlxAveragePrice: BsonDouble = if (differenceToOlxAveragePrice.isDefined)
       BsonDouble(differenceToOlxAveragePrice.get) else BsonDouble(-1)
