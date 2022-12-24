@@ -1,24 +1,17 @@
-//import Cloudant.CloudantCRUD
-import Mongo.CRUD
-import Mongo.Cast
+import Mongo.{CRUD, Cast}
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.jsoup.{HttpStatusException, Jsoup}
 import ujson.Value.Value
 
-import scala.collection.immutable.HashMap
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 
 
 object OlxDataCrawler extends App {
-
-  //  val cloudantClient: CloudantCRUD = new CloudantCRUD
-  val mongoOps: CRUD = new CRUD()
-  val mongoCast: Cast = new Cast()
+  private val mongoOps: CRUD = new CRUD()
+  private val mongoCast: Cast = new Cast()
 
   private val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios")
-    .data("query", "Java")
-    .userAgent("Mozilla")
     .timeout(20000)
     .get()
 
@@ -27,12 +20,10 @@ object OlxDataCrawler extends App {
   for (pg: Int <- Range(1, docMaxPage.toInt + 1, 1)) {
     val page: String = pg.toString
     val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios?o=$page")
-      .maxBodySize(1024 * 1024 * 100)
-      .userAgent("Mozilla")
-      .data("name", "jsoup")
+      .maxBodySize(0)
       .timeout(10 * 1000)
       .ignoreContentType(true)
-      .get
+      .get()
 
     for (num: Int <- Range(1, 55 + 1, 1)) {
       val carIterator: Elements = doc.select(s"#ad-list > li:nth-child($num)")
@@ -42,10 +33,8 @@ object OlxDataCrawler extends App {
           val innerPage: Document = Jsoup.connect(carIterator.select("div > a")
             .attr("href"))
             .maxBodySize(0)
-            .userAgent("Mozilla")
-            .data("name", "jsoup")
             .timeout(50 * 1000)
-            .get
+            .get()
 
 
           val masterJson: Value = ujson.read(innerPage.getElementsByAttributeValue("type", "text/plain").attr("data-json").replace("&quot", ""))
@@ -60,9 +49,20 @@ object OlxDataCrawler extends App {
             propertiesList += item("name").str -> item("values").arr.map(item => item("label").str).toList
           })
 
+          def verifyIfImageLinkExists(iteratorElement: Value): Boolean = {
+            try {
+              iteratorElement("original")
+
+              true
+            } catch { case _: NoSuchElementException => false}
+          }
+
           val mapOfImages: List[Option[String]] = if (masterJson("ad")("images").arrOpt.isDefined) {
-            masterJson("ad")("images").arr.map(image => image("original").strOpt).toList
-          } else { None.toList } // Map of Images
+            masterJson("ad")("images").arr.map(image =>
+              if(verifyIfImageLinkExists(image)) {
+                image("original").strOpt
+              } else None ).toList
+          } else List(None) // Map of Images
 
           val title: Option[String] = masterJson("ad")("subject").strOpt // Title
 
