@@ -1,4 +1,4 @@
-import Mongo.{CRUD, Cast}
+import Mongo.{Ops, Cast}
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.jsoup.{HttpStatusException, Jsoup}
@@ -8,7 +8,7 @@ import scala.collection.mutable
 
 
 object OlxDataCrawler extends App {
-  private val mongoOps: CRUD = new CRUD()
+  private val mongoOps: Ops = new Ops()
   private val mongoCast: Cast = new Cast()
 
   private val doc: Document = Jsoup.connect(s"https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios")

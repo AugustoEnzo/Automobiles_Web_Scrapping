@@ -3,8 +3,10 @@ package Mongo
 import org.mongodb.scala._
 import org.mongodb.scala.result.InsertOneResult
 
+import scala.collection.mutable
 
-class CRUD {
+
+class Ops {
   private val mongoClient: MongoClient = new Connection().client
 
   private val database: MongoDatabase = mongoClient.getDatabase("automobiles")
