@@ -248,7 +248,7 @@ object OlxDataCrawler extends App {
 
           if (mapOfImages.nonEmpty & adId.nonEmpty) {
 
-            mongoOps.createAndInsert(adId, mongoCast.cast(
+            mongoOps.createAndInsertOlxDataCrawler(adId, mongoCast.castOlxCrawlerData(
               adId, mapOfImages, title, model, brand, price,
               financialInformation, kilometers, description, typeOfCar, typeOfShift, typeOfFuel, typeOfDirection,
               yearOfFabrication, color, endOfPlate, motorPower, hasGNV, numberOfDoors, characteristics, optionals,

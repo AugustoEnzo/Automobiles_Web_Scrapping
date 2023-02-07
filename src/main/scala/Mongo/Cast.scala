@@ -6,20 +6,20 @@ import org.mongodb.scala.bson._
 import scala.collection.mutable
 
 class Cast {
-  def cast(adId: String, mapOfImages: List[Option[String]],
-           title: Option[String], model: Option[String], brand: Option[String], price: Option[Double],
-           financialInformation: Option[List[String]], kilometers: Option[Double],
-           description: Option[String], typeOfCar: Option[String], typeOfShift: Option[String],
-           typeOfFuel: Option[String], typeOfDirection: Option[String], yearOfFabrication: Option[String],
-           color: Option[String], endOfPlate: Option[Int], motorPower: Option[Double],
-           hasGNV: Option[Boolean], numberOfDoors: Option[Int], characteristics: Map[String, Option[Boolean]],
-           optionals: Option[List[String]], locationInformation: Map[String, Option[Any]],
-           url: String, publishDate: String, profileInformation: Option[Map[String, Option[Any]]],
-           fundingInformation: Option[Map[String, Double]],
-           verificationInformation: Option[Map[String, Option[Any]]],
-           averageOlxPrice: Option[Double], fipePrice: Option[Double],
-           fipePriceRef: Option[Map[String, Double]], differenceToOlxAveragePrice: Option[Double],
-           differenceToFipePrice: Option[Double], vehicleSpecificData: mutable.HashMap[String, String]): Document = {
+  def castOlxCrawlerData(adId: String, mapOfImages: List[Option[String]],
+                         title: Option[String], model: Option[String], brand: Option[String], price: Option[Double],
+                         financialInformation: Option[List[String]], kilometers: Option[Double],
+                         description: Option[String], typeOfCar: Option[String], typeOfShift: Option[String],
+                         typeOfFuel: Option[String], typeOfDirection: Option[String], yearOfFabrication: Option[String],
+                         color: Option[String], endOfPlate: Option[Int], motorPower: Option[Double],
+                         hasGNV: Option[Boolean], numberOfDoors: Option[Int], characteristics: Map[String, Option[Boolean]],
+                         optionals: Option[List[String]], locationInformation: Map[String, Option[Any]],
+                         url: String, publishDate: String, profileInformation: Option[Map[String, Option[Any]]],
+                         fundingInformation: Option[Map[String, Double]],
+                         verificationInformation: Option[Map[String, Option[Any]]],
+                         averageOlxPrice: Option[Double], fipePrice: Option[Double],
+                         fipePriceRef: Option[Map[String, Double]], differenceToOlxAveragePrice: Option[Double],
+                         differenceToFipePrice: Option[Double], vehicleSpecificData: mutable.HashMap[String, String]): Document = {
 
     val tempMapOfImages: BsonArray = new BsonArray
     mapOfImages.foreach(image => if (image.isDefined) tempMapOfImages.add(BsonString(image.get)))
@@ -143,6 +143,46 @@ class Cast {
       "differenceToOlxAveragePrice" -> tempDifferenceToOlxAveragePrice,
       "differenceToFipePrice" -> tempDifferenceToFipePrice,
       "vehicleSpecificData" -> tempVehicleSpecificData
+    )
+
+    document
+  }
+  def castMercadoLibreCrawlerData(adId: Option[String], mainCharacteristics: Map[String, Option[Any]],
+                                  other: mutable.Map[String, String], description: String,
+                                  questionAndAnswers: mutable.Map[String, List[Map[String, String]]]): Document = {
+
+    val tempBsonDocument = new BsonDocument
+    val tempMainCharacteristics: BsonDocument = new BsonDocument
+    mainCharacteristics.foreach(
+      characteristic => if (characteristic._2.isDefined) characteristic._2.get match {
+        case s: String => tempMainCharacteristics.append(characteristic._1, BsonString(s))
+        case d: Double => tempMainCharacteristics.append(characteristic._1, BsonDouble(d))
+        case i: Int => tempMainCharacteristics.append(characteristic._1, BsonInt32(i))
+        case map: Map[String, Option[Int]] => tempMainCharacteristics.append(characteristic._1, tempBsonDocument.append(
+          map.head._1, BsonInt32(map.head._2.getOrElse(-1))))
+      }
+    )
+
+    val tempOther: BsonDocument = new BsonDocument
+    other.foreach(otherIterator => tempOther.append(otherIterator._1, BsonString(otherIterator._2)))
+
+    val tempDescription: BsonString = BsonString(description)
+
+    val tempBsonDocumentTwo: BsonDocument = new BsonDocument
+    val tempQuestionAndAnswers: BsonDocument = new BsonDocument
+//    questionAndAnswers.foreach(questionAndAnswer => tempQuestionAndAnswers
+//      .append(questionAndAnswer._1, questionAndAnswer._2.head.foreach(
+//        answer => tempBsonDocumentTwo.append(answer._1, BsonString(answer._2)))))
+    questionAndAnswers.foreach(questionAndAnswer => questionAndAnswer._2.head.foreach(answer =>
+      tempQuestionAndAnswers.append(questionAndAnswer._1, tempBsonDocumentTwo.append(answer._1, BsonString(answer._2)))
+    ))
+
+    val document: Document = Document(
+      "_id" -> adId.get,
+      "mainCharacteristics" -> tempMainCharacteristics,
+      "otherCharacteristics" -> tempOther,
+      "description" -> tempDescription,
+      "questionAndAnswers" -> tempQuestionAndAnswers
     )
 
     document

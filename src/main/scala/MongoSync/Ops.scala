@@ -6,15 +6,16 @@ import org.bson.Document
 import org.bson.conversions.Bson
 
 import scala.collection.mutable
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 class Ops {
   private val client: MongoClient = MongoClients.create("mongodb://srv-data:27017")
 
   private val database: MongoDatabase = client.getDatabase("automobiles")
 
-  def readAndGetCollectionInformation(): mutable.ArrayBuffer[List[String]] = {
+  def readAndGetCollectionInformation(): (ArrayBuffer[List[String]], ListBuffer[String]) = {
 
-    val listOfCollections: mutable.ArrayBuffer[String] = mutable.ArrayBuffer[String]()
+    val listOfCollections: mutable.ListBuffer[String] = mutable.ListBuffer[String]()
 
     database.listCollectionNames().forEach(collection => listOfCollections.append(collection))
 
@@ -35,6 +36,6 @@ class Ops {
       resultString.append(List(modelDocument.get("model").toString, modelDocument.get("yearOfFabrication").toString))
     }
 
-    resultString
+    (resultString, listOfCollections)
   }
 }

@@ -8,7 +8,7 @@ lazy val root = (project in file("."))
   )
 
 libraryDependencies += "org.jsoup" % "jsoup" % "1.15.3"
-libraryDependencies += "com.ibm.cloud" % "cloudant" % "0.4.1"
+libraryDependencies += "com.ibm.cloud" % "cloudant" % "0.4.2"
 libraryDependencies += "com.ibm.cos" % "ibm-cos-java-sdk" % "2.12.1"
 libraryDependencies += "com.lihaoyi" %% "upickle" % "2.0.0"
 libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.8.1"
