@@ -1,0 +1,83 @@
+version: 0.0.1
+
+services:
+  cassandra:
+    image: cassandra:4.1.3
+    networks:
+      - broker-kafka
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+      - "9160:9160"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD", "cqlsh", "-u cassandra", "-p cassandra" ,"-e describe keyspaces"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    restart: always
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    networks:
+      - broker-kafka
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 15s
+      timeout: 2s
+      retries: 10
+    restart: always
+  kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: kafka
+    networks:
+      - broker-kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      cassandra:
+        condition: service_healthy
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.3.20:9092,PLAINTEXT_INTERNAL://broker:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "29092"]
+      interval: 15s
+      timeout: 2s
+      retries: 15
+    restart: always
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.0-SNAPSHOT
+    container_name: kafdrop
+    networks:
+      - broker-kafka
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - 9000:9000
+    environment:
+      KAFKA_BROKERCONNECT: PLAINTEXT://kafka:9092
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: always
+networks:
+  broker-kafka:
+    driver: bridge
+volumes:
+ cassandra_data:
+   driver: local

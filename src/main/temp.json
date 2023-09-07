@@ -1,0 +1,674 @@
+{
+    "deviceType": "desktop",
+    "urls": {
+        "AUTH_URL": "https://apigw.olx.com.br/auth/v1/accounts/my",
+        "FAVORITES_API_URL": "https://apigw.olx.com.br/cdhv/favorite/api/v1",
+        "AUTH_ACCESS_KEY": "kkUAvgIi7zuGcj3j18dJSjeq5nnzPv9Z",
+        "MY_ACCOUNTS_API_SECRET": "JJmohWcaC5OF7AZW2h9uWNvSiDapkxof",
+        "RE_GOOGLE_MAPS_API_KEY": "AIzaSyBCvbkDcD7YCb2uP3R2d3ZUIHKG9hPcIoQ",
+        "POINTS_OF_SALE_URL": "https://pointsofsales.olx.com.br",
+        "DELIVERY_API_URL": "https://delivery-quote.olx.com.br/api/v1",
+        "CHAT_URL": "https://m.olx.com.br/anuncio/chat?ad_id=",
+        "AUTOS_PRO_EXPERIENCE_ACCOUNTS_SECRET": "Adpa9RdS4Iv51BHD8bhMwBhcceDzGCoM",
+        "CARTEIRO_SERVICE_URL": "https://apigw.olx.com.br/v1/seller/email",
+        "GOLLUM_URL": "https://gollum.olx.com.br/api/v1/my-precious",
+        "FAVORITES_API_SECRET": "xobt1DEOn8CblfaIFx5Ul5TNI0bKrZ0i",
+        "MY_ACCOUNTS_API_URL": "https://apigw.olx.com.br/v3/me",
+        "BASE_URL": "olx.com.br",
+        "PHONE_RANGER_API_URL": "https://apigw.olx.com.br/v1/showphone"
+    },
+    "ad": {
+        "featured": [
+            "VISUAL_FEATURED"
+        ],
+        "denounceLink": "https://denuncia.olx.com.br/report?from=web&data=eyJsaXN0SWQiOjEyMDM2Mzg4MTAsInRpdGxlIjoiSG9uZGEgQ2l0eSBFWCAxLjUgMjAxMyIsInByaWNlIjoiNDk5MDAifQ==",
+        "subject": "Honda City EX 1.5 2013",
+        "abuyFipePrice": null,
+        "searchCategoryLevelTwo": 0,
+        "videos": null,
+        "body": "Honda City EX 1.5 2013, carro de mulher, completo, com ar digital, bancos em coro e emplacamento (IPVA) 2023 pago. Carro em excelente estado com pneus novos. Carro com manual e chave reserva.<br>NÃO ACEITO TROCA E NEM PROPOSTA DE REVENDEDOR",
+        "listId": 1203638810,
+        "adReply": "0",
+        "searchboxes": [
+            {
+                "link": "https://www.olx.com.br/agro-e-industria",
+                "label": "Agro e indústria"
+            },
+            {
+                "link": "https://www.olx.com.br/animais-de-estimacao",
+                "label": "Animais de estimação"
+            },
+            {
+                "link": "https://www.olx.com.br/artigos-infantis",
+                "label": "Artigos infantis"
+            },
+            {
+                "link": "https://www.olx.com.br/autos-e-pecas",
+                "label": "Autos e peças"
+            },
+            {
+                "link": "https://www.olx.com.br/comercio-e-escritorio",
+                "label": "Comércio e escritório"
+            },
+            {
+                "link": "https://www.olx.com.br/eletronicos-e-celulares",
+                "label": "Eletrônicos e celulares"
+            },
+            {
+                "link": "https://www.olx.com.br/esportes-e-lazer",
+                "label": "Esportes e lazer"
+            },
+            {
+                "link": "https://www.olx.com.br/imoveis",
+                "label": "Imóveis"
+            },
+            {
+                "link": "https://www.olx.com.br/moda-e-beleza",
+                "label": "Moda e beleza"
+            },
+            {
+                "link": "https://www.olx.com.br/musica-e-hobbies",
+                "label": "Música e hobbies"
+            },
+            {
+                "link": "https://www.olx.com.br/para-a-sua-casa",
+                "label": "Para a sua casa"
+            },
+            {
+                "link": "https://www.olx.com.br/servicos",
+                "label": "Serviços"
+            },
+            {
+                "link": "https://www.olx.com.br/vagas-de-emprego",
+                "label": "Vagas de emprego"
+            }
+        ],
+        "price": "R$ 49.900",
+        "isFeatured": true,
+        "priceLabel": "Preço",
+        "planBundleZap": false,
+        "images": [
+            {
+                "thumbnail": "https://img.olx.com.br/thumbs/36/362314410246436.jpg",
+                "original": "https://img.olx.com.br/images/36/362314410246436.jpg",
+                "webpFormat": "https://img.olx.com.br/images/36/362314410246436.webp",
+                "thumbnailWebpFormat": "https://img.olx.com.br/thumbs/36/362314410246436.webp",
+                "originalAlt": "Honda City EX 1.5 2013"
+            },
+            {
+                "thumbnail": "https://img.olx.com.br/thumbs/36/360340412632676.jpg",
+                "original": "https://img.olx.com.br/images/36/360340412632676.jpg",
+                "webpFormat": "https://img.olx.com.br/images/36/360340412632676.webp",
+                "thumbnailWebpFormat": "https://img.olx.com.br/thumbs/36/360340412632676.webp",
+                "originalAlt": "Honda City EX 1.5 2013 - Foto 2"
+            },
+            {
+                "thumbnail": "https://img.olx.com.br/thumbs/36/367379773249602.jpg",
+                "original": "https://img.olx.com.br/images/36/367379773249602.jpg",
+                "webpFormat": "https://img.olx.com.br/images/36/367379773249602.webp",
+                "thumbnailWebpFormat": "https://img.olx.com.br/thumbs/36/367379773249602.webp",
+                "originalAlt": "Honda City EX 1.5 2013 - Foto 3"
+            },
+            {
+                "thumbnail": "https://img.olx.com.br/thumbs/36/369384294392918.jpg",
+                "original": "https://img.olx.com.br/images/36/369384294392918.jpg",
+                "webpFormat": "https://img.olx.com.br/images/36/369384294392918.webp",
+                "thumbnailWebpFormat": "https://img.olx.com.br/thumbs/36/369384294392918.webp",
+                "originalAlt": "Honda City EX 1.5 2013 - Foto 4"
+            },
+            {
+                "thumbnail": "https://img.olx.com.br/thumbs/36/367306534667407.jpg",
+                "original": "https://img.olx.com.br/images/36/367306534667407.jpg",
+                "webpFormat": "https://img.olx.com.br/images/36/367306534667407.webp",
+                "thumbnailWebpFormat": "https://img.olx.com.br/thumbs/36/367306534667407.webp",
+                "originalAlt": "Honda City EX 1.5 2013 - Foto 5"
+            },
+            {
+                "thumbnail": "https://img.olx.com.br/thumbs/36/360360293871064.jpg",
+                "original": "https://img.olx.com.br/images/36/360360293871064.jpg",
+                "webpFormat": "https://img.olx.com.br/images/36/360360293871064.webp",
+                "thumbnailWebpFormat": "https://img.olx.com.br/thumbs/36/360360293871064.webp",
+                "originalAlt": "Honda City EX 1.5 2013 - Foto 6"
+            }
+        ],
+        "locationProperties": [
+            {
+                "label": "CEP",
+                "value": "69060020"
+            },
+            {
+                "label": "Município",
+                "value": "Manaus"
+            },
+            {
+                "label": "Bairro",
+                "value": "Aleixo"
+            }
+        ],
+        "searchCategoryLevelOne": 2020,
+        "vehicleSpecificData": [
+            {
+                "value": "33",
+                "key": "vehicle_brand"
+            },
+            {
+                "value": "2",
+                "key": "vehicle_model"
+            },
+            {
+                "value": "3",
+                "key": "vehicle_version"
+            }
+        ],
+        "sellerHistory": {
+            "canceledSalesAmounts": 0,
+            "totalDispatchTimeInMinutes": 0,
+            "id": "41910145",
+            "averageDispatchTime": "0 minutos",
+            "salesAmounts": 0
+        },
+        "adId": 1456572697,
+        "realEstateSpecificData": {
+            "showSimulatorButton": false,
+            "mip": 0.0001046125093,
+            "tax": 0.095
+        },
+        "securityTips": [
+            "Não faça pagamentos antes de verificar se o veículo existe.",
+            "Antes de fechar negócio, sempre busque pelo histórico do veículo.",
+            "Fique atento a preços abaixo do mercado e a excessos de facilidades."
+        ],
+        "phone": {
+            "phoneHidden": true,
+            "phone": "",
+            "phoneExist": false,
+            "phoneVerified": true
+        },
+        "breadcrumbUrls": [
+            {
+                "label": "Amazonas",
+                "url": "https://www.olx.com.br/estado-am"
+            },
+            {
+                "label": "Região de Manaus",
+                "url": "https://www.olx.com.br/estado-am/regiao-de-manaus"
+            },
+            {
+                "label": "Carros, vans e utilitários",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/estado-am/regiao-de-manaus"
+            },
+            {
+                "label": "Manaus",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/estado-am/regiao-de-manaus/manaus"
+            },
+            {
+                "label": "Aleixo",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/estado-am/regiao-de-manaus/manaus/aleixo"
+            }
+        ],
+        "hasRealEstateHighlight": false,
+        "slotsId": [
+            "adBottomLocation"
+        ],
+        "friendlyUrl": "https://am.olx.com.br/regiao-de-manaus/autos-e-pecas/carros-vans-e-utilitarios/honda-city-ex-1-5-2013-1203638810",
+        "listTime": "2023-08-26T21:05:58.000Z",
+        "trackingSpecificData": [
+            {
+                "value": "Região de Manaus",
+                "key": "region"
+            },
+            {
+                "value": "CITY",
+                "key": "model"
+            },
+            {
+                "value": "CITY SEDAN EX 1.5 FLEX 16V 4P AUT.",
+                "key": "version"
+            }
+        ],
+        "description": "Honda City EX 1.5 2013, carro de mulher, completo, com ar digital, bancos em coro e emplacamento (IPVA) 2023 pago. Carro em excelente estado com pneus novos. Carro com manual e chave reserva.<br>NÃO ACEITO TROCA E NEM PROPOSTA DE REVENDEDOR",
+        "chatEnabled": true,
+        "categoryName": "Carros, vans e utilitários",
+        "searchCategoryLevelZero": 2000,
+        "professionalAd": false,
+        "abuyPriceRef": {
+            "price_stddev": 2942,
+            "price_p50": 49900,
+            "price_p75": 50900,
+            "price_p33": 49000,
+            "price_p66": 50900,
+            "year_month_ref": 202307,
+            "price_min": 45000,
+            "price_p25": 45000,
+            "price_max": 54500,
+            "vehicle_count": 22
+        },
+        "carSpecificData": {
+            "price": null,
+            "financing": {
+                "cta": null,
+                "upfrontPayment": {
+                    "label": "Entrada",
+                    "value": "R$ 10.978,00"
+                },
+                "installment": {
+                    "label": "Pague em",
+                    "value": "48x R$ 1.321,12*"
+                }
+            },
+            "isFinanceable": true,
+            "tags": [
+                {
+                    "label": "IPVA pago"
+                },
+                {
+                    "label": "Não aceita troca"
+                }
+            ]
+        },
+        "parentCategoryName": "Autos e peças",
+        "oldPrice": null,
+        "olxDelivery": {
+            "weight": null,
+            "enabled": false
+        },
+        "priceValue": "R$ 49.900",
+        "pubSpecificData": [
+            {
+                "data": [
+                    {
+                        "value": "11647460",
+                        "key": "appnexus_placement_id"
+                    },
+                    {
+                        "value": "4349252,4349257",
+                        "key": "aol_placement_id"
+                    },
+                    {
+                        "value": "802888",
+                        "key": "criteo_zone_id"
+                    }
+                ],
+                "context": "width=300,height=250"
+            },
+            {
+                "data": [
+                    {
+                        "value": null,
+                        "key": "afsh_channel_id"
+                    },
+                    {
+                        "value": "partner-vert-pla-olx-pdp",
+                        "key": "afsh_pub_id"
+                    }
+                ],
+                "context": "width=*,height=*"
+            }
+        ],
+        "vehicleTags": [
+            {
+                "tags": [
+                    "vehiclehistory"
+                ]
+            }
+        ],
+        "isCompetitionLock": false,
+        "nativeVas": [
+            {
+                "icon": {
+                    "ref": null,
+                    "_owner": null,
+                    "key": null,
+                    "props": {}
+                },
+                "rel": "nofollow",
+                "text": "Simular financiamento",
+                "type": "autos-financing",
+                "url": "https://financiamento-marketplace.olx.com.br?li=1203638810&origin=adview_btn"
+            }
+        ],
+        "origListTime": 1693083958,
+        "location": {
+            "municipalityId": 10032,
+            "address": null,
+            "mapLong": 0,
+            "ddd": "92",
+            "municipality": "Manaus",
+            "zipcode": "69060020",
+            "uf": "AM",
+            "zone": "manaus",
+            "neighbourhood": "Aleixo",
+            "zoneId": 4706,
+            "region": "Manaus e região, AM",
+            "neighbourhoodId": 49782,
+            "mapLati": 0
+        },
+        "category": 2020,
+        "loanSpecificData": null,
+        "user": {
+            "configs": {
+                "competitionLock": false,
+                "proAccount": false,
+                "chatEnabled": true
+            },
+            "accountId": 41910145,
+            "name": "Marcelo Janaina Alencar",
+            "publicAccountId": "4ec2bd32-8412-482b-bc8a-cf661bca11ae",
+            "userId": 45094164,
+            "userUid": null
+        },
+        "properties": [
+            {
+                "values": null,
+                "name": "category",
+                "label": "Categoria",
+                "value": "Carros, vans e utilitários",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/estado-am/regiao-de-manaus/manaus"
+            },
+            {
+                "values": null,
+                "name": "vehicle_model",
+                "label": "Modelo",
+                "value": "HONDA CITY SEDAN EX 1.5 FLEX 16V 4P AUT.",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/honda/city/estado-am/regiao-de-manaus/manaus"
+            },
+            {
+                "values": null,
+                "name": "vehicle_brand",
+                "label": "Marca",
+                "value": "HONDA",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/honda/estado-am/regiao-de-manaus/manaus"
+            },
+            {
+                "values": null,
+                "name": "cartype",
+                "label": "Tipo de veículo",
+                "value": "Sedã",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "regdate",
+                "label": "Ano",
+                "value": "2013",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/honda/city/2013/estado-am/regiao-de-manaus/manaus"
+            },
+            {
+                "values": null,
+                "name": "mileage",
+                "label": "Quilometragem",
+                "value": "105946",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "motorpower",
+                "label": "Potência do motor",
+                "value": "1.5",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "fuel",
+                "label": "Combustível",
+                "value": "Flex",
+                "url": "https://www.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios/honda/city/flex/estado-am/regiao-de-manaus/manaus"
+            },
+            {
+                "values": null,
+                "name": "gearbox",
+                "label": "Câmbio",
+                "value": "Automático",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "car_steering",
+                "label": "Direção",
+                "value": "Elétrica",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "carcolor",
+                "label": "Cor",
+                "value": "Preto",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "doors",
+                "label": "Portas",
+                "value": "4 portas",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "end_tag",
+                "label": "Final de placa",
+                "value": "5",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "owner",
+                "label": "Único dono",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "exchange",
+                "label": "Aceita trocas",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": [
+                    {
+                        "rawValue": 2,
+                        "label": "IPVA Pago"
+                    }
+                ],
+                "name": "financial",
+                "label": "Estado financeiro",
+                "value": "IPVA Pago",
+                "url": null
+            },
+            {
+                "values": [
+                    {
+                        "rawValue": 6,
+                        "label": "Alarme"
+                    },
+                    {
+                        "rawValue": 5,
+                        "label": "Air bag"
+                    },
+                    {
+                        "rawValue": 1,
+                        "label": "Ar condicionado"
+                    },
+                    {
+                        "rawValue": 8,
+                        "label": "Sensor de ré"
+                    },
+                    {
+                        "rawValue": 7,
+                        "label": "Som"
+                    },
+                    {
+                        "rawValue": 4,
+                        "label": "Trava elétrica"
+                    },
+                    {
+                        "rawValue": 3,
+                        "label": "Vidro elétrico"
+                    }
+                ],
+                "name": "car_features",
+                "label": "Opcionais",
+                "value": "Alarme, Air bag, Ar condicionado, Sensor de ré, Som, Trava elétrica, Vidro elétrico",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "gnv_kit",
+                "label": "Kit GNV",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "owner_manual",
+                "label": "Com manual",
+                "value": "Sim",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "extra_key",
+                "label": "Chave reserva",
+                "value": "Sim",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "dealership_review",
+                "label": "Revisões feitas em concessionária",
+                "value": "Sim",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "warranty",
+                "label": "Com garantia",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "has_gnv_kit",
+                "label": "Possui Kit GNV",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "has_auction",
+                "label": "De leilão",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "has_paid_ipva",
+                "label": "IPVA pago",
+                "value": "Sim",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "has_with_fine",
+                "label": "Com multas",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "is_settled",
+                "label": "Quitado",
+                "value": "Sim",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "is_funded",
+                "label": "Financiado",
+                "value": "Não",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "indexed_financial_status",
+                "label": "Status financeiro indexado",
+                "value": "Quitado",
+                "url": null
+            },
+            {
+                "values": [
+                    {
+                        "rawValue": 1,
+                        "label": "IPVA Pago"
+                    }
+                ],
+                "name": "documentation_and_regularization",
+                "label": "Documentação e regularização",
+                "value": "IPVA Pago",
+                "url": null
+            },
+            {
+                "values": [
+                    {
+                        "rawValue": 2,
+                        "label": "Com manual"
+                    },
+                    {
+                        "rawValue": 3,
+                        "label": "Chave reserva"
+                    },
+                    {
+                        "rawValue": 4,
+                        "label": "Revisões feitas em concessionária"
+                    }
+                ],
+                "name": "conservation_and_warranty",
+                "label": "Conservação e garantia",
+                "value": "Com manual, Chave reserva, Revisões feitas em concessionária",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "indexed_car_steering",
+                "label": "Tipo de direção",
+                "value": "Elétrica",
+                "url": null
+            },
+            {
+                "values": null,
+                "name": "on_autos_fair",
+                "label": "No Festival de Carros/Feirão de Autos",
+                "value": "Não",
+                "url": null
+            }
+        ],
+        "olxPay": {
+            "installments": [],
+            "eligibleToOptin": false,
+            "dynamicBadgeProps": [],
+            "enabled": false
+        },
+        "vehicleReport": {
+            "reportLink": "https://historico-veicular.olx.com.br/?id=13687194-12f5-489f-a599-11a366a7b3b3",
+            "description": "Verifique se os dados do Histórico Veicular são os mesmos informados no anúncio. Informações referentes a consulta realizada em 05/08/2023 às 21:09:13 (horário de Brasília) no Denatran",
+            "reportTitle": "Ver relatório completo",
+            "title": "Relatório de histórico veicular",
+            "enabled": true,
+            "tags": [
+                {
+                    "iconUrl": "https://static.olx.com.br/autos/vehicle-history/icons/restrictionsimage.png",
+                    "label": "Sem restrições"
+                },
+                {
+                    "iconUrl": "https://static.olx.com.br/autos/vehicle-history/icons/finesimage.png",
+                    "label": "Sem multas"
+                },
+                {
+                    "iconUrl": "https://static.olx.com.br/autos/vehicle-history/icons/gravameimage.png",
+                    "label": "Carro quitado"
+                }
+            ]
+        }
+    },
+    "abTestGroups": "adsxp-adviewlinks-bjQTZ-3020_control.adv-desk-amazon_enabled.bumpds-bjperformancetrackb_control.chatmod-logged-user-showphonebody_enabled.ck-baggage-color-bjfilters_enabled.ck-clothing-brand-bjfilters_enabled.ck-filters-cosmetic-8020_control.contentmod-first-tip-chat_v1.delivery-cancellation-page_enabled.delivery-quote-weight-11060_control.delivery-quote-weight-3040_control.delivery-shelf-amd-fakedoor_B.ds-header-navbar_enabled.ds-web-vitals_enabled.ngage-adview-miniprofile_control.ngage-chat-miniprofile_enabled.ngage-chat-on-gallery_enabled.ngage-listing-title_control.pos-real-estate-fee-boost_g-to-p.ppf-fee-boost-autos_enabled.ppf-fee-boost-goods_enabled.re-highlight_control.rec-nf-adv-rename-galleries_enabled.sanityweb50_control.txp-fakedoor-buy-button_optin"
+}

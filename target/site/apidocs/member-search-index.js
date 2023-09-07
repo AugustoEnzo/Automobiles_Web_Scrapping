@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"com.augenz.automobiles.crawlers","c":"OlxWebCrawler","l":"main(String[])","u":"main(java.lang.String[])"},{"p":"com.augenz.automobiles.crawlers","c":"OlxWebCrawler","l":"OlxWebCrawler()","u":"%3Cinit%3E()"}];updateSearchResults();
