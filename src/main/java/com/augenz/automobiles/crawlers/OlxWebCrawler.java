@@ -1,37 +1,42 @@
 package com.augenz.automobiles.crawlers;
 
+import com.augenz.automobiles.helpers.JedisHelper;
 import com.augenz.automobiles.models.OlxAd;
+import com.augenz.automobiles.producers.OlxDataCrawlerProducer;
 import java.io.IOException;
+import static java.lang.String.format;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.util.*;
 import java.util.logging.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.augenz.automobiles.producers.OlxDataCrawlerProducer;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
-import static java.lang.String.format;
 
 /**
  * Gets data from Olx
  */
 public class OlxWebCrawler {
-    private static final int NUMBER_OF_ADS_PER_PAGE = 54;
-    private static final int TIMEOUT_FOR_WEB_CRAWLING = 5000;
+    private static final int LAST_PAGE = 101;
+    private static final int ADS_TO_PROCESS = 54 * 100;
+    private static final int TIMEOUT_FOR_WEB_CRAWILNG_IN_MILISECONDS = 50000;
     private static final String CLASS_NAME = OlxWebCrawler.class.getName();
     private static final Logger logger = Logger.getLogger(OlxWebCrawler.CLASS_NAME);
     private static final OlxDataCrawlerProducer producer = new OlxDataCrawlerProducer();
+    private static final Random rand = new Random();
+    private static final JedisHelper jedisHelper = new JedisHelper();
 
-    private static boolean verifyIfImageLinkExists(@NotNull final JSONObject image) {
+    private static boolean verifyIfImageLinkExists(final JSONObject image) {
         try {
             image.getString("original");
 
@@ -41,40 +46,79 @@ public class OlxWebCrawler {
         }
     }
     
-    @Contract(pure = true)
-    private static String removeValuesFromString(String stringToCleanValues, final String @NotNull [] valuesToRemove) {
+    private static String removeValuesFromString(String stringToCleanValues, final String[] valuesToRemove) {
         for (String valueToRemove : valuesToRemove) {
             stringToCleanValues = stringToCleanValues.replace(valueToRemove, "");
         } return stringToCleanValues;
     }
 
     public static void main(final String[] args) {
-        int docMaxPage = 101;
+        int processedAds = 0;
+        int notValidAds = 0;
+
         logger.setLevel(Level.SEVERE);
 
-        for (int pg = 1; pg < docMaxPage; pg++) {
+        for (int pg = 1; pg < LAST_PAGE; pg++) {
             try {
                 String page = String.valueOf(pg);
+                List<Proxy> listOfProxies = new ArrayList<>();
+                for (Map.Entry<String, String> entry: jedisHelper.getProxy(String.format("proxy-%d", rand.nextInt(385))).entrySet()) {
+                    listOfProxies.add(
+                            new Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved(entry.getKey(), Integer.parseInt(entry.getValue())))
+                    );
+                }
                 final Document pageOfAds = Jsoup.connect("https://am.olx.com.br/autos-e-pecas/carros-vans-e-utilitarios?o=" + page)
                         .maxBodySize(0)
-                        .timeout(TIMEOUT_FOR_WEB_CRAWLING)
+                        .timeout(TIMEOUT_FOR_WEB_CRAWILNG_IN_MILISECONDS)
                         .ignoreContentType(true)
+                        .userAgent(jedisHelper.getUserAgent(String.format("user-agent-%d", rand.nextInt(7))))
+                        .proxy(listOfProxies.get(0))
+                        .header("Content-Language", "pt-BR")
                         .get();
-                logger.config("Looking the document for page: " + page);
+                
+                logger.log(Level.INFO, "Looking the document for page: {0}", page);
+                
+                
+                Elements divsWithTheClass = pageOfAds.getElementsByClass("sc-fdaac595-0");
+                int NUMBER_OF_ADS_PER_PAGE = 0;
+                for (Element div: divsWithTheClass) {
+                    if (div.hasClass("sc-fdaac595-0"))
+                        NUMBER_OF_ADS_PER_PAGE ++;
+                }
+                
+                System.out.println(NUMBER_OF_ADS_PER_PAGE); 
+               
 
-                for (int adIndex = 3; NUMBER_OF_ADS_PER_PAGE > adIndex; adIndex++) {
+                for (int adIndex = 1; adIndex < NUMBER_OF_ADS_PER_PAGE; adIndex++) {
+//                      legacy: #main-content > div:nth-child(%d)
+//                    div.sc-fdaac595-0:nth-child(1)
+                    Elements adPageElements = pageOfAds.select(String.format("div.sc-fdaac595-0:nth-child(%d)", adIndex));
 
-                    Elements adPageElements = pageOfAds.select(format("#main-content > div:nth-child(%d)", adIndex));
-
-                    logger.info(format("Accessing data for ad number: %s page: %s", adIndex, page));
-
-                    if (!adPageElements.text().isEmpty()) {
+                    if (adPageElements.text().isEmpty()) {
+                        notValidAds += 1;
+                        double percentageOfNotValidAds = BigDecimal.valueOf(((float) notValidAds / ADS_TO_PROCESS) * 100)
+                                .setScale(2, RoundingMode.HALF_UP).doubleValue();
+                        
+                        logger.log(Level.INFO, "Percentage of not valid Ads: {0} %", percentageOfNotValidAds);
+                    } else {
                         try {
-                            if (!adPageElements.select("div > a").attr("href").isEmpty()) {
-                                Document adDocument = Jsoup.connect(adPageElements.select("div > a")
+                            // div.sc-fdaac595-0:nth-child(53) > section:nth-child(1) > a:nth-child(1)
+                            // legacy: !adPageElements.select("div > a").attr("href").isEmpty()
+
+                            for (Map.Entry<String, String> entry: jedisHelper.getProxy(String.format("proxy-%d", rand.nextInt(385))).entrySet()) {
+                                listOfProxies.add(
+                                        new Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved(entry.getKey(), Integer.parseInt(entry.getValue())))
+                                );
+                            }
+
+                            if (!adPageElements.select("section:nth-child(1) > a:nth-child(1)").attr("href").isEmpty()) {
+                                Document adDocument = Jsoup.connect(adPageElements.select("section:nth-child(1) > a:nth-child(1)")
                                         .attr("href"))
                                         .maxBodySize(0)
-                                        .timeout(TIMEOUT_FOR_WEB_CRAWLING)
+                                        .timeout(TIMEOUT_FOR_WEB_CRAWILNG_IN_MILISECONDS)
+                                        .userAgent(jedisHelper.getUserAgent(String.format("user-agent-%d", rand.nextInt(7))))
+                                        .proxy(listOfProxies.get(1))
+                                        .header("Content-Language", "pt-BR")
                                         .get();
 
                                 JSONObject adJson = new JSONObject(adDocument
@@ -112,9 +156,9 @@ public class OlxWebCrawler {
                                                 if (!"0".equals(value.getString("label"))) {
                                                     listOfValues.add(value.getString("label").trim());
                                                 }
-                                          }
-
-                                          propertiesMap.put(tempProperty.get("name").toString(), listOfValues);
+                                            }
+                                            
+                                            propertiesMap.put(tempProperty.get("name").toString(), listOfValues);
                                         }
                                     }
 
@@ -152,7 +196,10 @@ public class OlxWebCrawler {
 
                                     List<String> documentationAndRegularization = propertiesMap.get("documentation_and_regularization");
 
-                                    List<String> features = propertiesMap.get("car_features");
+                                    List<String> features = new ArrayList<>();
+                                    if (propertiesMap.get("car_features") != null) {
+                                        features = propertiesMap.get("car_features");
+                                    }
 
                                     String kilometers = properties.get("mileage");
 
@@ -258,37 +305,37 @@ public class OlxWebCrawler {
                                     String publishDate = adDocument.select(".hSZkck").text()
                                             .replace("Publicado em ", "")
                                             .replace(" às ", "T");
-
-                                    Map<String, String> profileInfo = new HashMap<>();
-                                if (!adJson.getJSONObject("ad").isNull("sellerHistory")) {
-                                    Pattern numberPattern = Pattern.compile("[0-9]+", Pattern.CASE_INSENSITIVE);
                                     
-                                    JSONObject tempUserInfo = adJson.getJSONObject("ad").getJSONObject("user");
-
-                                    JSONObject sellerHistory = adJson.getJSONObject("ad").getJSONObject("sellerHistory");
-
-                                    String averageDispatchTime = adJson.getJSONObject("ad").getJSONObject("sellerHistory").getString("averageDispatchTime");
-                                    profileInfo.putIfAbsent("accountId", String.valueOf(tempUserInfo.get("accountId")));
-                                    profileInfo.putIfAbsent("userId", String.valueOf(tempUserInfo.get("userId")));
-                                    profileInfo.putIfAbsent("name", String.valueOf(tempUserInfo.get("name")));
-                                    profileInfo.putIfAbsent("isPhoneVerified", String.valueOf(adJson.getJSONObject("ad").getJSONObject("phone").get("phoneVerified")));
-                                    profileInfo.putIfAbsent("salesAmounts", String.valueOf(sellerHistory.getInt("salesAmounts")));
-                                    profileInfo.putIfAbsent("canceledSalesAmounts", String.valueOf(sellerHistory.getInt("canceledSalesAmounts")));
-                                    profileInfo.putIfAbsent("totalDispatchTimeInMinutes", String.valueOf(sellerHistory.getDouble("totalDispatchTimeInMinutes")));
-                                    Matcher matcher = numberPattern.matcher(averageDispatchTime);                                            
-                                    if (matcher.find()) {
-                                        if (averageDispatchTime.contains("dia") || averageDispatchTime.contains("dias")) {
-                                            profileInfo.putIfAbsent("averageDispatchTime", String.valueOf(Double.parseDouble(matcher.group()) * 3600));
-                                        } else if (averageDispatchTime.contains("mês") || averageDispatchTime.contains("meses")) {
-                                            profileInfo.putIfAbsent("averageDispatchTime", String.valueOf(Double.parseDouble(matcher.group()) * 43800.048));
-                                        } else {
-                                            profileInfo.putIfAbsent("averageDispatchTime", String.valueOf(Double.parseDouble(matcher.group())));
+                                    Map<String, String> profileInfo = new HashMap<>();
+                                    if (!adJson.getJSONObject("ad").isNull("sellerHistory")) {
+                                        Pattern numberPattern = Pattern.compile("[0-9]+", Pattern.CASE_INSENSITIVE);
+                                        
+                                        JSONObject tempUserInfo = adJson.getJSONObject("ad").getJSONObject("user");
+                                        
+                                        JSONObject sellerHistory = adJson.getJSONObject("ad").getJSONObject("sellerHistory");
+                                        
+                                        String averageDispatchTime = adJson.getJSONObject("ad").getJSONObject("sellerHistory").getString("averageDispatchTime");
+                                        profileInfo.putIfAbsent("accountId", String.valueOf(tempUserInfo.get("accountId")));
+                                        profileInfo.putIfAbsent("userId", String.valueOf(tempUserInfo.get("userId")));
+                                        profileInfo.putIfAbsent("name", String.valueOf(tempUserInfo.get("name")));
+                                        profileInfo.putIfAbsent("isPhoneVerified", String.valueOf(adJson.getJSONObject("ad").getJSONObject("phone").get("phoneVerified")));
+                                        profileInfo.putIfAbsent("salesAmounts", String.valueOf(sellerHistory.getInt("salesAmounts")));
+                                        profileInfo.putIfAbsent("canceledSalesAmounts", String.valueOf(sellerHistory.getInt("canceledSalesAmounts")));
+                                        profileInfo.putIfAbsent("totalDispatchTimeInMinutes", String.valueOf(sellerHistory.getDouble("totalDispatchTimeInMinutes")));
+                                        Matcher matcher = numberPattern.matcher(averageDispatchTime);
+                                        if (matcher.find()) {
+                                            if (averageDispatchTime.contains("dia") || averageDispatchTime.contains("dias")) {
+                                                profileInfo.putIfAbsent("averageDispatchTime", String.valueOf(Double.parseDouble(matcher.group()) * 3600));
+                                            } else if (averageDispatchTime.contains("mês") || averageDispatchTime.contains("meses")) {
+                                                profileInfo.putIfAbsent("averageDispatchTime", String.valueOf(Double.parseDouble(matcher.group()) * 43800.048));
+                                            } else {
+                                                profileInfo.putIfAbsent("averageDispatchTime", String.valueOf(Double.parseDouble(matcher.group())));
+                                            }
+                                        }
+                                        if (!tempUserInfo.isNull("configs")) {
+                                            profileInfo.putIfAbsent("proAccount", String.valueOf(tempUserInfo.getJSONObject("configs").get("proAccount")));
                                         }
                                     }
-                                    if (!tempUserInfo.isNull("configs")) {
-                                        profileInfo.putIfAbsent("proAccount", String.valueOf(tempUserInfo.getJSONObject("configs").get("proAccount")));
-                                    }
-                                }
 
                                     final Map<String, String> fundingInfo = new HashMap<>();
                                     if (!adJson.getJSONObject("ad").getJSONObject("carSpecificData").getJSONObject("financing").isNull("installment") &&
@@ -372,24 +419,30 @@ public class OlxWebCrawler {
                                                 characteristics, features, financialInfo, locationInfo, profileInfo, fundingInfo, tags, verificationInfo,
                                                 fipePriceRef, vehicleSpecificData);
 
-                                        producer.send("olx", olxAd);
-                                        
+//                                        producer.send("olx", olxAd);
+
+                                        processedAds ++;
+                                        double percentageOfProcessedAds = BigDecimal.valueOf(((float) processedAds / ADS_TO_PROCESS) * 100)
+                                                .setScale(2, RoundingMode.HALF_UP).doubleValue();
+
+                                        logger.log(Level.INFO, "Number of already processed ads {0}", processedAds);
+                                        logger.log(Level.INFO, "Percentage of processed ads: {0} %", percentageOfProcessedAds);
                                     }
                                     
                                 }
                             }
                         } catch (HttpStatusException | SocketTimeoutException httpStatusException) {
-                            logger.severe(format("Error trying fetch ad page.\n%s", httpStatusException));
+                            logger.severe(format("Error trying fetch ads page %d", pg));
                         } catch (IOException ioException) {
-                            logger.severe(format("Jsoup could not read the date from this document.%s", ioException));
+                            logger.severe(format("Jsoup could not read the data from this document.%s", ioException));
                         }
                     }
                 }
 
             } catch (HttpStatusException | SocketTimeoutException httpStatusException) {
-                logger.severe(format("Error trying fetch ads page.\n%s", httpStatusException));
+                logger.severe(format("Error trying fetch ads page %d", pg));
             } catch (IOException ioException) {
-                logger.severe(format("Jsoup could not read the date from this document.%s", ioException));
+                logger.severe(format("Jsoup could not read the data from this document.%s", ioException));
             }
         }
     }

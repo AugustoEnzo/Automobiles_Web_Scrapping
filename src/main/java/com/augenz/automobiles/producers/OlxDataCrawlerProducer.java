@@ -12,7 +12,6 @@ import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.specific.SpecificDatumWriter;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,7 +30,7 @@ public class OlxDataCrawlerProducer extends OlxSchema implements GenericProducer
     BinaryEncoder encoder = GenericProducer.createEncoder(output);
 
 
-    public void send(String topic, @NotNull OlxAd olxAd) {
+    public void send(String topic, OlxAd olxAd) {
         try {
             output.reset();
 
@@ -57,12 +56,12 @@ public class OlxDataCrawlerProducer extends OlxSchema implements GenericProducer
             genericOlxDataCrawlerRecord.put("hasGNV", olxAd.hasGNV);
             genericOlxDataCrawlerRecord.put("numberOfDoors", olxAd.numberOfDoors);
             genericOlxDataCrawlerRecord.put("characteristics", olxAd.characteristics);
-            genericOlxDataCrawlerRecord.put("optionals", olxAd.features);
+            genericOlxDataCrawlerRecord.put("features", olxAd.features);
             genericOlxDataCrawlerRecord.put("locationInfo", olxAd.locationInfo);
             genericOlxDataCrawlerRecord.put("publishDate", olxAd.publishDate);
             genericOlxDataCrawlerRecord.put("profileInfo", olxAd.profileInfo);
             genericOlxDataCrawlerRecord.put("fundingInfo", olxAd.fundingInfo);
-            genericOlxDataCrawlerRecord.put("tagsList", olxAd.tags);
+            genericOlxDataCrawlerRecord.put("tags", olxAd.tags);
             genericOlxDataCrawlerRecord.put("verificationInfo", olxAd.verificationInfo);
             genericOlxDataCrawlerRecord.put("fipePrice", olxAd.fipePrice);
             genericOlxDataCrawlerRecord.put("fipePriceRef", olxAd.fipePriceRef);
