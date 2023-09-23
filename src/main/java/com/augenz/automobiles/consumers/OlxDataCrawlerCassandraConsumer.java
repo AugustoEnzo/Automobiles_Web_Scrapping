@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -45,7 +46,7 @@ public class OlxDataCrawlerCassandraConsumer extends OlxSchema implements Generi
         Decoder decoder = DecoderFactory.get().binaryDecoder(message, null);
         GenericRecord olxAdData = reader.read(null, decoder);
 
-        System.out.println(olxAdData);
+        logger.log(Level.INFO, String.format("Olx ad message: %M", olxAdData));
     }
 
     private void getOlxAdMessagesFromBeginning() {
@@ -67,9 +68,10 @@ public class OlxDataCrawlerCassandraConsumer extends OlxSchema implements Generi
 
     private void getInstantOlxAdMessages() {
         consumer.subscribe(topics);
+        boolean consuming = true;
 
         try (consumer) {
-            while (true) {
+            while (consuming) {
                 for (ConsumerRecord<String, byte[]> record: consumer.poll(Duration.ofMillis(100))) {
                     deserializeOlxAdMessage(record.value());
                 }

@@ -90,8 +90,6 @@ public class OlxWebCrawler {
                
 
                 for (int adIndex = 1; adIndex < NUMBER_OF_ADS_PER_PAGE; adIndex++) {
-//                      legacy: #main-content > div:nth-child(%d)
-//                    div.sc-fdaac595-0:nth-child(1)
                     Elements adPageElements = pageOfAds.select(String.format("div.sc-fdaac595-0:nth-child(%d)", adIndex));
 
                     if (adPageElements.text().isEmpty()) {
@@ -102,9 +100,6 @@ public class OlxWebCrawler {
                         logger.log(Level.INFO, "Percentage of not valid Ads: {0} %", percentageOfNotValidAds);
                     } else {
                         try {
-                            // div.sc-fdaac595-0:nth-child(53) > section:nth-child(1) > a:nth-child(1)
-                            // legacy: !adPageElements.select("div > a").attr("href").isEmpty()
-
                             for (Map.Entry<String, String> entry: jedisHelper.getProxy(String.format("proxy-%d", rand.nextInt(385))).entrySet()) {
                                 listOfProxies.add(
                                         new Proxy(Proxy.Type.HTTP, InetSocketAddress.createUnresolved(entry.getKey(), Integer.parseInt(entry.getValue())))
