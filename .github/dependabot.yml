@@ -1,0 +1,43 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "org.jsoup.jsoup"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "org.apache.kafka.kafka-clients"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "org.apache.avro.avro"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "com.datastax.oss.java-driver-core"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "com.datastax.oss.java-driver-query-builder"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "com.datastax.oss.java-driver-mapper-runtime"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "org.json.json"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "org.seleniumhq.selenium.selenium-java"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "org.apache.maven.plugins.maven-shade-plugins"
+    directory: "/"
+    schedule:
+      interval: "weekly"
